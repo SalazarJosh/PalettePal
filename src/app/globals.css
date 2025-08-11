@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #f8fafc;
+  --foreground: #1e293b;
+  --sidebar-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --text-muted: #64748b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0f172a;
+    --foreground: #f1f5f9;
+    --sidebar-bg: #1e293b;
+    --border-color: #334155;
+    --text-muted: #94a3b8;
+  }
+}
+
+/* Custom utilities for color swatches */
+.text-shadow-sm {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom neuomorphic styles for PalettePal */
+.neumorph {
+  background: var(--background);
+  box-shadow: 8px 8px 16px rgba(136, 165, 191, 0.48), -8px -8px 16px rgba(255, 255, 255, 0.8);
+  border-radius: 15px;
+}
+
+.neumorph-inset {
+  background: var(--background);
+  box-shadow: inset 8px 8px 16px rgba(136, 165, 191, 0.48), inset -8px -8px 16px rgba(255, 255, 255, 0.8);
+  border-radius: 15px;
+}
