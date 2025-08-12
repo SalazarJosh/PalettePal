@@ -55,38 +55,18 @@ function PaletteCard({ palette, onDuplicate, onDelete, onExport, onEdit }: Palet
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
       <div className="mb-4">
         {preview.length > 0 ? (
-          <div className="space-y-2">
+          <div className="flex">
             {preview.map((color, index) => {
               const { textColor, contrastRatio } = getTextColorAndContrast(color.color);
               return (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-600"
+                  className="flex-1 h-8"
                   style={{ 
                     backgroundColor: color.color,
-                    aspectRatio: '2/1',
-                    minHeight: '40px',
                     color: textColor
                   }}
                 >
-                  <div className="text-center flex-1">
-                    {color.name && (
-                      <div className="font-semibold text-xs mb-1 truncate">
-                        {color.name}
-                      </div>
-                    )}
-                    <div className="font-mono text-xs opacity-90">
-                      {color.color.toUpperCase()}
-                    </div>
-                  </div>
-                  <div className="text-right text-xs opacity-80 ml-2">
-                    <div className="font-mono">
-                      {contrastRatio}:1
-                    </div>
-                    <div className="text-xs opacity-70">
-                      {contrastRatio >= 7 ? 'AAA' : contrastRatio >= 4.5 ? 'AA' : contrastRatio >= 3 ? 'AA Large' : 'Fail'}
-                    </div>
-                  </div>
                 </div>
               );
             })}

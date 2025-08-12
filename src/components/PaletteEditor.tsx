@@ -77,15 +77,16 @@ interface ColorGridProps {
   onColorClick: (index: number) => void;
   onAddColor: () => void;
   gridSize: 'small' | 'medium' | 'large';
+  onCopyNotification: (message: string) => void;
 }
 
-function ColorGrid({ colors, onColorClick, onAddColor, gridSize }: ColorGridProps) {
+function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotification }: ColorGridProps) {
   const maxColors = gridSize === 'small' ? 12 : gridSize === 'medium' ? 24 : 48;
   const gridCols = gridSize === 'small' ? 'grid-cols-2' : gridSize === 'medium' ? 'grid-cols-3' : 'grid-cols-4';
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      // Visual feedback could be added here
+      onCopyNotification(`Copied ${text}`);
     }).catch(() => {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -94,6 +95,7 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize }: ColorGridProp
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
+      onCopyNotification(`Copied ${text}`);
     });
   };
 
@@ -140,10 +142,10 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize }: ColorGridProp
                 e.stopPropagation();
                 copyToClipboard(color.color);
               }}
-              className="absolute top-2 right-2 w-6 h-6 bg-black bg-opacity-50 text-white rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              className="absolute top-2 right-2 w-30 h-6 bg-black bg-opacity-50 text-white rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
               title="Copy color code"
             >
-              📋
+               Copy to clipboard 📋
             </button>
           </div>
         );
@@ -176,6 +178,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   const [contrastForeground, setContrastForeground] = useState('#000000');
   const [contrastBackground, setContrastBackground] = useState('#ffffff');
   const [textSize, setTextSize] = useState<'normal' | 'large'>('normal');
+  const [copyNotification, setCopyNotification] = useState<string | null>(null);
 
   useEffect(() => {
     if (isLoaded) {
@@ -301,9 +304,15 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     setIsEditingName(false);
   };
 
+  const handleCopyNotification = (message: string) => {
+    setCopyNotification(message);
+    setTimeout(() => setCopyNotification(null), 3000);
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      alert(`Copied ${text} to clipboard!`);
+      setCopyNotification(`Copied ${text}`);
+      setTimeout(() => setCopyNotification(null), 3000);
     }).catch(() => {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -312,7 +321,8 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      alert(`Copied ${text} to clipboard!`);
+      setCopyNotification(`Copied ${text}`);
+      setTimeout(() => setCopyNotification(null), 3000);
     });
   };
 
@@ -432,6 +442,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
             onColorClick={handleColorClick}
             onAddColor={handleAddColor}
             gridSize={palette.gridSize}
+            onCopyNotification={handleCopyNotification}
           />
         ) : (
           <div className="text-center py-16">
@@ -485,7 +496,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                   className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
                   title="Copy color code"
                 >
-                  📋
+                  Copy to clipboard 📋
                 </button>
               </div>
 
@@ -726,6 +737,16 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Copy Notification Popup */}
+      {copyNotification && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <span>✓</span>
+            <span>{copyNotification}</span>
           </div>
         </div>
       )}
