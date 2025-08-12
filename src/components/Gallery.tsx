@@ -5,8 +5,8 @@ import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Palette } from '@/types';
 import PaletteEditor from './PaletteEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub, faTwitter, faLinkedin, faReact } from '@fortawesome/free-brands-svg-icons';
-import { faCode } from '@fortawesome/free-solid-svg-icons';
+import { faGithub, faLinkedin, faReact } from '@fortawesome/free-brands-svg-icons';
+import { faCode, faCheckSquare, faPause, faPalette, faThLarge, faBars, faSave, faFolder, faTrash, faChartBar, faDatabase, faStar, faEye, faGear, faMagic } from '@fortawesome/free-solid-svg-icons';
 
 interface PaletteCardProps {
   palette: Palette;
@@ -383,7 +383,9 @@ export default function Gallery() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4">🎨</div>
+          <div className="text-4xl mb-4">
+            <FontAwesomeIcon icon={faPalette} className="text-primary-500" />
+          </div>
           <div className="text-lg text-gray-600">Loading PalettePal...</div>
         </div>
       </div>
@@ -399,7 +401,7 @@ export default function Gallery() {
             <div className="flex justify-between items-center h-16">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white">PalettePal</h1>
-                <p className="text-sm text-gray-500">Your Color Palette Collection</p>
+                <p className="text-sm text-gray-500">Your Color Palette Tool</p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -467,13 +469,13 @@ export default function Gallery() {
                 onClick={() => setViewMode('grid')}
                 className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
               >
-                ⊞
+                <FontAwesomeIcon icon={faThLarge} className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
                 className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
               >
-                ☰
+                <FontAwesomeIcon icon={faBars} className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -494,7 +496,9 @@ export default function Gallery() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <div className="text-6xl mb-4">🎨</div>
+              <div className="text-6xl mb-4">
+                <FontAwesomeIcon icon={faPalette} className="text-gray-400" />
+              </div>
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
                 {searchTerm ? 'No palettes found' : 'No palettes yet'}
               </h2>
@@ -601,8 +605,12 @@ export default function Gallery() {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Auto-save</h3>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div>
-                    <p className="font-medium text-gray-900 dark:text-white">
-                      {autoSaveEnabled ? '✅ Auto-save enabled' : '⏸️ Auto-save disabled'}
+                    <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                      <FontAwesomeIcon 
+                        icon={autoSaveEnabled ? faCheckSquare : faPause} 
+                        className={`w-4 h-4 ${autoSaveEnabled ? 'text-green-500' : 'text-orange-500'}`}
+                      />
+                      {autoSaveEnabled ? 'Auto-save enabled' : 'Auto-save disabled'}
                     </p>
                     <p className="text-sm text-gray-500">
                       {autoSaveEnabled ? 'Changes are saved automatically' : 'Save manually to preserve changes'}
@@ -621,9 +629,10 @@ export default function Gallery() {
                 {!autoSaveEnabled && (
                   <button
                     onClick={manualSave}
-                    className="mt-2 w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                    className="mt-2 w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
                   >
-                    💾 Save Now
+                    <FontAwesomeIcon icon={faSave} className="w-4 h-4" />
+                    Save Now
                   </button>
                 )}
               </div>
@@ -634,24 +643,33 @@ export default function Gallery() {
                 <div className="space-y-3">
                   <button
                     onClick={handleImportBackup}
-                    className="w-full px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-left"
+                    className="w-full px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors text-left flex items-center gap-2"
                   >
-                    📁 Import Full Backup
-                    <p className="text-sm opacity-75">Replace all data with backup file</p>
+                    <FontAwesomeIcon icon={faFolder} className="w-4 h-4" />
+                    <div>
+                      <div>Import Full Backup</div>
+                      <p className="text-sm opacity-75">Replace all data with backup file</p>
+                    </div>
                   </button>
                   <button
                     onClick={handleBackupData}
-                    className="w-full px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors text-left"
+                    className="w-full px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors text-left flex items-center gap-2"
                   >
-                    💾 Download Full Backup
-                    <p className="text-sm opacity-75">Save all palettes and settings</p>
+                    <FontAwesomeIcon icon={faSave} className="w-4 h-4" />
+                    <div>
+                      <div>Download Full Backup</div>
+                      <p className="text-sm opacity-75">Save all palettes and settings</p>
+                    </div>
                   </button>
                   <button
                     onClick={handleClearAllData}
-                    className="w-full px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-left"
+                    className="w-full px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-left flex items-center gap-2"
                   >
-                    🗑️ Clear All Data
-                    <p className="text-sm opacity-75">Delete all palettes and reset app</p>
+                    <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+                    <div>
+                      <div>Clear All Data</div>
+                      <p className="text-sm opacity-75">Delete all palettes and reset app</p>
+                    </div>
                   </button>
                 </div>
               </div>
@@ -660,9 +678,18 @@ export default function Gallery() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Storage Info</h3>
                 <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                  <p>📊 {palettes.length} palette{palettes.length !== 1 ? 's' : ''}</p>
-                  <p>🎨 {palettes.reduce((sum, p) => sum + p.colors.length, 0)} color{palettes.reduce((sum, p) => sum + p.colors.length, 0) !== 1 ? 's' : ''}</p>
-                  <p>💾 Data stored in browser localStorage</p>
+                  <p className="flex items-center gap-2">
+                    <FontAwesomeIcon icon={faChartBar} className="w-4 h-4" />
+                    {palettes.length} palette{palettes.length !== 1 ? 's' : ''}
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <FontAwesomeIcon icon={faPalette} className="w-4 h-4" />
+                    {palettes.reduce((sum, p) => sum + p.colors.length, 0)} color{palettes.reduce((sum, p) => sum + p.colors.length, 0) !== 1 ? 's' : ''}
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <FontAwesomeIcon icon={faDatabase} className="w-4 h-4" />
+                    Data stored in browser localStorage
+                  </p>
                 </div>
               </div>
             </div>
@@ -682,14 +709,29 @@ export default function Gallery() {
       {showWelcome && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">🎨 Welcome to PalettePal!</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <FontAwesomeIcon icon={faPalette} className="text-primary-500" />
+              Welcome to PalettePal!
+            </h2>
             <div className="space-y-4 text-gray-600 dark:text-gray-300">
-              <p>PalettePal is your creative companion for building and managing beautiful color palettes.</p>
+              <p>PalettePal is your creative companion for building and managing color palettes with a focus on accessibility.</p>
               <div className="space-y-3">
-                <div><strong>🎨 Gallery View:</strong> See all your palettes at a glance</div>
-                <div><strong>✨ Quick Start:</strong> Click &quot;New Palette&quot; to create your first collection</div>
-                <div><strong>🎯 Easy Management:</strong> Edit, duplicate, or delete palettes with a click</div>
-                <div><strong>💾 Auto-Save:</strong> Your work is automatically saved to your browser</div>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faEye} className="w-4 h-4 text-primary-500" />
+                  <span><strong>Gallery View:</strong> See all your palettes at a glance</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faStar} className="w-4 h-4 text-primary-500" />
+                  <span><strong>Quick Start:</strong> Click &quot;New Palette&quot; to create your first collection</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faGear} className="w-4 h-4 text-primary-500" />
+                  <span><strong>Easy Management:</strong> Edit, duplicate, or delete palettes with a click</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FontAwesomeIcon icon={faSave} className="w-4 h-4 text-primary-500" />
+                  <span><strong>Auto-Save:</strong> Your work is automatically saved to your browser</span>
+                </div>
               </div>
               <p className="text-sm text-gray-500">
                 This tool uses your browser&apos;s local storage. Download backups regularly to keep your palettes safe!

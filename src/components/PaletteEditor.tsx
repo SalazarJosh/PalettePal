@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Color, Palette } from '@/types';
 import Link from 'next/link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPalette, faClipboard, faCheck, faEdit, faPlus, faExclamationTriangle, faTimes, faSearch, faXmark } from '@fortawesome/free-solid-svg-icons';
 
 // Utility function to calculate contrast ratio between two colors
 function calculateContrastRatio(foreground: string, background: string): number {
@@ -145,7 +147,7 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
               className="absolute top-2 right-2 w-30 h-6 bg-black bg-opacity-50 text-white rounded text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
               title="Copy color code"
             >
-               Copy to clipboard 📋
+              <FontAwesomeIcon icon={faClipboard} className="mr-1" /> Copy
             </button>
           </div>
         );
@@ -156,7 +158,7 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
           className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-500 flex items-center justify-center text-gray-400 hover:text-primary-500 transition-colors"
           style={{ aspectRatio: '2/1', minHeight: '80px' }}
         >
-          <span className="text-2xl">+</span>
+          <FontAwesomeIcon icon={faPlus} className="text-2xl" />
         </button>
       )}
     </div>
@@ -194,7 +196,9 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4">🎨</div>
+          <div className="text-4xl mb-4 text-purple-500">
+            <FontAwesomeIcon icon={faPalette} />
+          </div>
           <div className="text-lg text-gray-600">Loading palette...</div>
         </div>
       </div>
@@ -205,7 +209,9 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4">❌</div>
+          <div className="text-4xl mb-4 text-red-500">
+            <FontAwesomeIcon icon={faExclamationTriangle} />
+          </div>
           <div className="text-lg text-gray-600 mb-4">Palette not found</div>
           <Link
             href="/"
@@ -366,13 +372,13 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                       onClick={handleSavePaletteName}
                       className="px-2 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors"
                     >
-                      ✓
+                      <FontAwesomeIcon icon={faCheck} />
                     </button>
                     <button
                       onClick={handleCancelNameEdit}
                       className="px-2 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
                     >
-                      ✕
+                      <FontAwesomeIcon icon={faTimes} />
                     </button>
                   </div>
                 ) : (
@@ -383,7 +389,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                       className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                       title="Edit palette name"
                     >
-                      ✏️
+                      <FontAwesomeIcon icon={faEdit} />
                     </button>
                   </div>
                 )}
@@ -408,7 +414,8 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 onClick={() => setShowContrastChecker(true)}
                 className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
               >
-                🔍 Contrast
+                <FontAwesomeIcon icon={faSearch} className="mr-2" />
+                Contrast
               </button>
               <button
                 onClick={handleAddColor}
@@ -446,7 +453,9 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
           />
         ) : (
           <div className="text-center py-16">
-            <div className="text-6xl mb-4">🎨</div>
+            <div className="text-6xl mb-4 text-purple-500">
+              <FontAwesomeIcon icon={faPalette} />
+            </div>
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
               Empty palette
             </h2>
@@ -496,7 +505,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                   className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
                   title="Copy color code"
                 >
-                  Copy to clipboard 📋
+                  <FontAwesomeIcon icon={faClipboard} className="mr-1" /> Copy
                 </button>
               </div>
 
@@ -544,7 +553,10 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
       {showContrastChecker && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">🔍 Contrast Checker</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              <FontAwesomeIcon icon={faSearch} className="mr-2" />
+              Contrast Checker
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Color Selection */}
@@ -699,19 +711,19 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                         <h3 className="font-semibold text-gray-900 dark:text-white">WCAG Compliance</h3>
                         <div className="space-y-2 text-sm">
                           <div className={`flex items-center gap-2 ${actualContrast >= 4.5 ? 'text-green-600' : 'text-red-600'}`}>
-                            <span>{actualContrast >= 4.5 ? '✅' : '❌'}</span>
+                            <FontAwesomeIcon icon={actualContrast >= 4.5 ? faCheck : faXmark} />
                             <span>AA Normal Text (4.5:1)</span>
                           </div>
                           <div className={`flex items-center gap-2 ${actualContrast >= 3 ? 'text-green-600' : 'text-red-600'}`}>
-                            <span>{actualContrast >= 3 ? '✅' : '❌'}</span>
+                            <FontAwesomeIcon icon={actualContrast >= 3 ? faCheck : faXmark} />
                             <span>AA Large Text (3:1)</span>
                           </div>
                           <div className={`flex items-center gap-2 ${actualContrast >= 7 ? 'text-green-600' : 'text-red-600'}`}>
-                            <span>{actualContrast >= 7 ? '✅' : '❌'}</span>
+                            <FontAwesomeIcon icon={actualContrast >= 7 ? faCheck : faXmark} />
                             <span>AAA Normal Text (7:1)</span>
                           </div>
                           <div className={`flex items-center gap-2 ${actualContrast >= 4.5 ? 'text-green-600' : 'text-red-600'}`}>
-                            <span>{actualContrast >= 4.5 ? '✅' : '❌'}</span>
+                            <FontAwesomeIcon icon={actualContrast >= 4.5 ? faCheck : faXmark} />
                             <span>AAA Large Text (4.5:1)</span>
                           </div>
 
@@ -745,7 +757,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
       {copyNotification && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in">
           <div className="flex items-center gap-2">
-            <span>✓</span>
+            <FontAwesomeIcon icon={faCheck} />
             <span>{copyNotification}</span>
           </div>
         </div>
