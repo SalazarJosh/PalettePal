@@ -6,7 +6,7 @@ import { Color, Palette } from '@/types';
 import Link from 'next/link';
 import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPalette, faClipboard, faCheck, faEdit, faPlus, faExclamationTriangle, faTimes, faSearch, faXmark, faCircle, faAdjust } from '@fortawesome/free-solid-svg-icons';
+import { faPalette, faClipboard, faCheck, faEdit, faPlus, faExclamationTriangle, faTimes, faSearch, faXmark, faCircle, faAdjust, faMagic } from '@fortawesome/free-solid-svg-icons';
 
 // Validation functions
 function isValidHexColor(hex: string): boolean {
@@ -191,6 +191,158 @@ function generateShadesTints(hex: string): { shades: string[]; tints: string[] }
   }
   tints.reverse();
   return { shades, tints };
+}
+
+// Function to generate a random color palette
+function generateRandomPalette(): Color[] {
+  const paletteTypes = [
+    'monochromatic',
+    'analogous', 
+    'complementary',
+    'triadic',
+    'warm',
+    'cool'
+  ];
+  
+  const type = paletteTypes[Math.floor(Math.random() * paletteTypes.length)];
+  
+  // Generate a base hue (0-360)
+  const baseHue = Math.floor(Math.random() * 360);
+  
+  switch (type) {
+    case 'monochromatic':
+      return generateMonochromaticPalette(baseHue);
+    case 'analogous':
+      return generateAnalogousPalette(baseHue);
+    case 'complementary':
+      return generateComplementaryPalette(baseHue);
+    case 'triadic':
+      return generateTriadicPalette(baseHue);
+    case 'warm':
+      return generateWarmPalette();
+    case 'cool':
+      return generateCoolPalette();
+    default:
+      return generateMonochromaticPalette(baseHue);
+  }
+}
+
+function generateMonochromaticPalette(baseHue: number): Color[] {
+  const colors: Color[] = [];
+  const saturations = [75, 85, 65, 90];
+  const lightnesses = [25, 45, 65, 85];
+  
+  for (let i = 0; i < 4; i++) {
+    const hex = hslToHex(baseHue, saturations[i], lightnesses[i]);
+    colors.push({
+      color: hex,
+      name: null
+    });
+  }
+  
+  return colors;
+}
+
+function generateAnalogousPalette(baseHue: number): Color[] {
+  const colors: Color[] = [];
+  const hueOffsets = [0, 30, 60, -30];
+  
+  for (let i = 0; i < 4; i++) {
+    const hue = (baseHue + hueOffsets[i] + 360) % 360;
+    const saturation = 70 + Math.random() * 20; // 70-90%
+    const lightness = 40 + Math.random() * 30; // 40-70%
+    const hex = hslToHex(hue, saturation, lightness);
+    colors.push({
+      color: hex,
+      name: null
+    });
+  }
+  
+  return colors;
+}
+
+function generateComplementaryPalette(baseHue: number): Color[] {
+  const colors: Color[] = [];
+  const complementaryHue = (baseHue + 180) % 360;
+  
+  // Two shades of base color
+  colors.push({
+    color: hslToHex(baseHue, 80, 45),
+    name: null
+  });
+  colors.push({
+    color: hslToHex(baseHue, 70, 65),
+    name: null
+  });
+  
+  // Two shades of complementary color
+  colors.push({
+    color: hslToHex(complementaryHue, 80, 45),
+    name: null
+  });
+  colors.push({
+    color: hslToHex(complementaryHue, 70, 65),
+    name: null
+  });
+  
+  return colors;
+}
+
+function generateTriadicPalette(baseHue: number): Color[] {
+  const colors: Color[] = [];
+  const hues = [baseHue, (baseHue + 120) % 360, (baseHue + 240) % 360];
+  
+  for (let i = 0; i < 3; i++) {
+    const saturation = 75 + Math.random() * 15; // 75-90%
+    const lightness = 45 + Math.random() * 20; // 45-65%
+    const hex = hslToHex(hues[i], saturation, lightness);
+    colors.push({
+      color: hex,
+      name: null
+    });
+  }
+  
+  // Add a neutral color
+  colors.push({
+    color: hslToHex(0, 0, 85),
+    name: null
+  });
+  
+  return colors;
+}
+
+function generateWarmPalette(): Color[] {
+  const warmHues = [0, 15, 30, 45]; // Reds, oranges, yellows
+  const colors: Color[] = [];
+  
+  for (const hue of warmHues) {
+    const saturation = 70 + Math.random() * 20; // 70-90%
+    const lightness = 40 + Math.random() * 30; // 40-70%
+    const hex = hslToHex(hue, saturation, lightness);
+    colors.push({
+      color: hex,
+      name: null
+    });
+  }
+  
+  return colors;
+}
+
+function generateCoolPalette(): Color[] {
+  const coolHues = [180, 210, 240, 270]; // Cyans, blues, purples
+  const colors: Color[] = [];
+  
+  for (const hue of coolHues) {
+    const saturation = 70 + Math.random() * 20; // 70-90%
+    const lightness = 40 + Math.random() * 30; // 40-70%
+    const hex = hslToHex(hue, saturation, lightness);
+    colors.push({
+      color: hex,
+      name: null
+    });
+  }
+  
+  return colors;
 }
 
 interface PaletteEditorProps {
@@ -535,6 +687,44 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     setShowColorModal(true);
   };
 
+  const handleGeneratePalette = () => {
+    if (!palette) return;
+    
+    const paletteTypes = [
+      'monochromatic',
+      'analogous', 
+      'complementary',
+      'triadic',
+      'warm',
+      'cool'
+    ];
+    const type = paletteTypes[Math.floor(Math.random() * paletteTypes.length)];
+    const generatedColors = (() => {
+      switch (type) {
+      case 'monochromatic':
+        return generateMonochromaticPalette(Math.floor(Math.random() * 360));
+      case 'analogous':
+        return generateAnalogousPalette(Math.floor(Math.random() * 360));
+      case 'complementary':
+        return generateComplementaryPalette(Math.floor(Math.random() * 360));
+      case 'triadic':
+        return generateTriadicPalette(Math.floor(Math.random() * 360));
+      case 'warm':
+        return generateWarmPalette();
+      case 'cool':
+        return generateCoolPalette();
+      default:
+        return generateMonochromaticPalette(Math.floor(Math.random() * 360));
+      }
+    })();
+    updatePalette(palette.id, { colors: generatedColors });
+    setPalette({ ...palette, colors: generatedColors });
+    
+    // Show notification about the generated palette
+    setCopyNotification(`Generated random ${type} palette!`);
+    setTimeout(() => setCopyNotification(null), 3000);
+  };
+
   const handleSaveColor = () => {
     if (!palette) return;
 
@@ -674,8 +864,8 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     setPaletteNameError(null);
 
     // Validate palette name length
-    if (tempPaletteName.trim().length > 15) {
-      setPaletteNameError('Palette name must be 15 characters or less');
+    if (tempPaletteName.trim().length > 20) {
+      setPaletteNameError('Palette name must be 20 characters or less');
       return;
     }
 
@@ -745,7 +935,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                         value={tempPaletteName}
                         onChange={(e) => {
                           const value = e.target.value;
-                          if (value.length <= 15) {
+                          if (value.length <= 20) {
                             setTempPaletteName(value);
                             setPaletteNameError(null);
                           }
@@ -764,7 +954,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                       {paletteNameError && (
                         <p className="text-red-500 text-xs mt-1">{paletteNameError}</p>
                       )}
-                      <p className="text-gray-500 text-xs mt-1">{tempPaletteName.length}/15</p>
+                      <p className="text-gray-500 text-xs mt-1">{tempPaletteName.length}/20</p>
                     </div>
                     <button
                       onClick={handleSavePaletteName}
@@ -791,7 +981,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                     </button>
                   </div>
                 )}
-                <p className="text-sm text-gray-500">{palette.colors.length} colors</p>
+                {!isEditingName ? <p className="text-sm text-gray-500" id="colorCount">{palette.colors.length} colors</p> : null}
               </div>
             </div>
             <div className="flex gap-3">
@@ -885,14 +1075,24 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
               Empty palette
             </h2>
             <p className="text-gray-500 mb-6">
-              Add your first color to get started!
+              Add your first color or generate a random palette to get started!
             </p>
-            <button
-              onClick={handleAddColor}
-              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-            >
-              Add First Color
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <button
+                onClick={handleAddColor}
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2"
+              >
+                <FontAwesomeIcon icon={faPlus} />
+                Add First Color
+              </button>
+              <button
+                onClick={handleGeneratePalette}
+                className="px-6 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors flex items-center gap-2"
+              >
+                <FontAwesomeIcon icon={faMagic} />
+                Generate Palette
+              </button>
+            </div>
           </div>
         )}
       </main>

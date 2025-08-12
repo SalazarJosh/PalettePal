@@ -3,10 +3,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCode } from '@fortawesome/free-solid-svg-icons';
 import { faGithub, faLinkedin, faReact } from '@fortawesome/free-brands-svg-icons';
-
-interface FooterProps {
-  statsText?: string;
-}
+import { FooterProps } from '@/types';
 
 export default function Footer({ statsText }: FooterProps) {
   return (

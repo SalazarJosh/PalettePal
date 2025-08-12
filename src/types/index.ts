@@ -23,3 +23,7 @@ export interface AppData {
   autoSaveEnabled: boolean;
   lastSaved: string;
 }
+
+export interface FooterProps {
+  statsText?: string;
+}
