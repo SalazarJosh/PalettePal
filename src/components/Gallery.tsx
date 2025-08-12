@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Palette } from '@/types';
 import PaletteEditor from './PaletteEditor';
@@ -148,8 +148,11 @@ export default function Gallery() {
     shouldShowWelcome,
     setShowWelcome,
     toggleAutoSave,
-    manualSave
+    manualSave,
+    refreshFromStorage
   } = usePaletteStorage();
+
+  console.log('Gallery: Component rendering, palettes count:', palettes.length);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
@@ -166,22 +169,26 @@ export default function Gallery() {
     }
   }, [isLoaded, shouldShowWelcome]);
 
-  const filteredPalettes = palettes
-    .filter(palette => 
-      palette.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'colors':
-          return b.colors.length - a.colors.length;
-        case 'oldest':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        default: // 'recent'
-          return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
-      }
-    });
+  const filteredPalettes = useMemo(() => {
+    console.log('Gallery: Recalculating filteredPalettes, palettes count:', palettes.length);
+    console.log('Gallery: Palettes data:', palettes.map(p => ({ id: p.id, name: p.name, updatedAt: p.updatedAt })));
+    return palettes
+      .filter(palette => 
+        palette.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        switch (sortBy) {
+          case 'name':
+            return a.name.localeCompare(b.name);
+          case 'colors':
+            return b.colors.length - a.colors.length;
+          case 'oldest':
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          default: // 'recent'
+            return new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime();
+        }
+      });
+  }, [palettes, searchTerm, sortBy]);
 
   const handleCreatePalette = () => {
     if (!newPaletteName.trim()) return;
@@ -250,7 +257,14 @@ export default function Gallery() {
   };
 
   const handleBackToGallery = () => {
+    console.log('Gallery: Returning to gallery view, current palettes count:', palettes.length);
+    console.log('Gallery: Refreshing data from localStorage...');
+    refreshFromStorage();
     setEditingPaletteId(null);
+    // Add a small delay to ensure the refresh completes before rendering
+    setTimeout(() => {
+      console.log('Gallery: Back to gallery, palettes count after refresh:', palettes.length);
+    }, 100);
   };
 
   const handleImportPalette = () => {

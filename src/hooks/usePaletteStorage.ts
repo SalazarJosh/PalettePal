@@ -74,35 +74,35 @@ export function usePaletteStorage() {
     }
   }, [palettes, autoSaveEnabled, isLoaded, saveToStorage]);
 
-  const updatePalettes = (newPalettes: Palette[]) => {
+  const updatePalettes = useCallback((newPalettes: Palette[]) => {
     setPalettes(newPalettes);
-  };
+  }, []);
 
-  const addPalette = (palette: Palette) => {
+  const addPalette = useCallback((palette: Palette) => {
     const newPalettes = [...palettes, palette];
     updatePalettes(newPalettes);
-  };
+  }, [palettes, updatePalettes]);
 
-  const updatePalette = (paletteId: string, updates: Partial<Palette>) => {
+  const updatePalette = useCallback((paletteId: string, updates: Partial<Palette>) => {
     const newPalettes = palettes.map(p => 
       p.id === paletteId 
         ? { ...p, ...updates, updatedAt: new Date().toISOString() }
         : p
     );
     updatePalettes(newPalettes);
-  };
+  }, [palettes, updatePalettes]);
 
-  const deletePalette = (paletteId: string) => {
+  const deletePalette = useCallback((paletteId: string) => {
     const newPalettes = palettes.filter(p => p.id !== paletteId);
     updatePalettes(newPalettes);
-  };
+  }, [palettes, updatePalettes]);
 
-  const getPalette = (paletteId: string) => {
+  const getPalette = useCallback((paletteId: string) => {
     return palettes.find(p => p.id === paletteId);
-  };
+  }, [palettes]);
 
   // Welcome modal storage
-  const shouldShowWelcome = (): boolean => {
+  const shouldShowWelcome = useCallback((): boolean => {
     if (typeof window === 'undefined') return true;
     try {
       const welcomeData = localStorage.getItem(WELCOME_KEY);
@@ -111,26 +111,42 @@ export function usePaletteStorage() {
     } catch {
       return true;
     }
-  };
+  }, []);
 
-  const setShowWelcome = (show: boolean) => {
+  const setShowWelcome = useCallback((show: boolean) => {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(WELCOME_KEY, JSON.stringify(show));
     } catch (error) {
       console.error('Error saving welcome preference:', error);
     }
-  };
+  }, []);
 
-  const manualSave = () => {
+  const manualSave = useCallback(() => {
     saveToStorage(palettes, autoSaveEnabled);
-  };
+  }, [saveToStorage, palettes, autoSaveEnabled]);
 
-  const toggleAutoSave = () => {
+  const toggleAutoSave = useCallback(() => {
     const newAutoSave = !autoSaveEnabled;
     setAutoSaveEnabled(newAutoSave);
     saveToStorage(palettes, newAutoSave);
-  };
+  }, [autoSaveEnabled, saveToStorage, palettes]);
+
+  const refreshFromStorage = useCallback(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        const data: AppData = JSON.parse(savedData);
+        console.log('usePaletteStorage: Refreshing from localStorage, found palettes:', data.palettes?.length);
+        setPalettes(data.palettes || []);
+        setAutoSaveEnabled(data.autoSaveEnabled ?? true);
+      }
+    } catch (error) {
+      console.error('Error refreshing from storage:', error);
+    }
+  }, []);
 
   return {
     palettes,
@@ -145,6 +161,7 @@ export function usePaletteStorage() {
     setShowWelcome,
     manualSave,
     toggleAutoSave,
-    saveToStorage
+    saveToStorage,
+    refreshFromStorage
   };
 }

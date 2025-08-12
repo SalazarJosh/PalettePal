@@ -24,13 +24,13 @@ function calculateContrastRatio(foreground: string, background: string): number 
 
   const fg = parseColor(foreground);
   const bg = parseColor(background);
-  
+
   const fgLuminance = getLuminance(fg.r, fg.g, fg.b);
   const bgLuminance = getLuminance(bg.r, bg.g, bg.b);
-  
+
   const lightest = Math.max(fgLuminance, bgLuminance);
   const darkest = Math.min(fgLuminance, bgLuminance);
-  
+
   return Math.round(((lightest + 0.05) / (darkest + 0.05)) * 100) / 100;
 }
 
@@ -39,7 +39,7 @@ function getTextColorAndContrast(hexColor: string) {
   const r = parseInt(hexColor.slice(1, 3), 16);
   const g = parseInt(hexColor.slice(3, 5), 16);
   const b = parseInt(hexColor.slice(5, 7), 16);
-  
+
   // Calculate relative luminance
   const getLuminance = (r: number, g: number, b: number) => {
     const [rs, gs, bs] = [r, g, b].map(c => {
@@ -48,19 +48,19 @@ function getTextColorAndContrast(hexColor: string) {
     });
     return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
   };
-  
+
   const backgroundLuminance = getLuminance(r, g, b);
   const whiteLuminance = 1;
   const blackLuminance = 0;
-  
+
   // Calculate contrast ratios
   const whiteContrast = (whiteLuminance + 0.05) / (backgroundLuminance + 0.05);
   const blackContrast = (backgroundLuminance + 0.05) / (blackLuminance + 0.05);
-  
+
   // Choose the color with better contrast
   const useWhite = whiteContrast > blackContrast;
   const contrastRatio = useWhite ? whiteContrast : blackContrast;
-  
+
   return {
     textColor: useWhite ? '#ffffff' : '#000000',
     contrastRatio: Math.round(contrastRatio * 100) / 100
@@ -105,7 +105,7 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize }: ColorGridProp
           <div
             key={index}
             className="relative rounded-lg cursor-pointer hover:scale-105 transition-transform border-2 border-gray-200 dark:border-gray-600 hover:border-primary-500 group overflow-hidden"
-            style={{ 
+            style={{
               backgroundColor: color.color,
               aspectRatio: '2/1',
               minHeight: '80px'
@@ -171,20 +171,21 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   const [colorName, setColorName] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempPaletteName, setTempPaletteName] = useState('');
-  
+
   // Contrast checker state
   const [contrastForeground, setContrastForeground] = useState('#000000');
   const [contrastBackground, setContrastBackground] = useState('#ffffff');
+  const [textSize, setTextSize] = useState<'normal' | 'large'>('normal');
 
   useEffect(() => {
     if (isLoaded) {
       const foundPalette = getPalette(paletteId);
       setPalette(foundPalette || null);
-      if (foundPalette) {
+      if (foundPalette && !isEditingName) {
         setTempPaletteName(foundPalette.name);
       }
     }
-  }, [paletteId, getPalette, isLoaded]);
+  }, [paletteId, getPalette, isLoaded, isEditingName]);
 
   if (!isLoaded) {
     return (
@@ -203,7 +204,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
         <div className="text-center">
           <div className="text-4xl mb-4">❌</div>
           <div className="text-lg text-gray-600 mb-4">Palette not found</div>
-          <Link 
+          <Link
             href="/"
             className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
           >
@@ -248,6 +249,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     }
 
     updatePalette(palette.id, { colors: newColors });
+    console.log('PaletteEditor: Updated palette colors, new count:', newColors.length);
     setPalette({ ...palette, colors: newColors });
     setShowColorModal(false);
   };
@@ -263,7 +265,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
 
   const handleClearPalette = () => {
     if (!palette || palette.colors.length === 0) return;
-    
+
     if (confirm('Clear all colors from the palette?')) {
       updatePalette(palette.id, { colors: [] });
       setPalette({ ...palette, colors: [] });
@@ -276,18 +278,19 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     const dataStr = JSON.stringify(palette, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = `${palette.name.replace(/[^a-z0-9]/gi, '_')}.json`;
     link.click();
-    
+
     URL.revokeObjectURL(url);
   };
 
   const handleSavePaletteName = () => {
     if (!palette || !tempPaletteName.trim()) return;
-    
+
+    console.log('PaletteEditor: Saving palette name:', tempPaletteName.trim());
     updatePalette(palette.id, { name: tempPaletteName.trim() });
     setPalette({ ...palette, name: tempPaletteName.trim() });
     setIsEditingName(false);
@@ -321,14 +324,14 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
               {onBack ? (
-                <button 
+                <button
                   onClick={onBack}
                   className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   ← Gallery
                 </button>
               ) : (
-                <Link 
+                <Link
                   href="/"
                   className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
@@ -456,7 +459,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               {editingIndex !== null ? 'Edit Color' : 'Add Color'}
             </h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -485,7 +488,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                   📋
                 </button>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Name (optional)
@@ -499,7 +502,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 />
               </div>
             </div>
-            
+
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleSaveColor}
@@ -531,7 +534,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">🔍 Contrast Checker</h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Color Selection */}
               <div className="space-y-4">
@@ -606,6 +609,35 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                     </div>
                   )}
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Text Size
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setTextSize('normal')}
+                      className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${textSize === 'normal'
+                          ? 'bg-primary-500 text-white border-primary-500'
+                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                        }`}
+                    >
+                      Normal Text
+                    </button>
+                    <button
+                      onClick={() => setTextSize('large')}
+                      className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${textSize === 'large'
+                          ? 'bg-primary-500 text-white border-primary-500'
+                          : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                        }`}
+                    >
+                      Large Text
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {textSize === 'normal' ? 'Regular text (14pt+) and UI components' : 'Large text (18pt+ or 14pt+ bold)'}
+                  </p>
+                </div>
               </div>
 
               {/* Contrast Results */}
@@ -613,7 +645,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 {(() => {
                   const { contrastRatio } = getTextColorAndContrast(contrastBackground);
                   const actualContrast = calculateContrastRatio(contrastForeground, contrastBackground);
-                  
+
                   return (
                     <>
                       <div className="text-center">
@@ -624,17 +656,30 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                       </div>
 
                       {/* Preview */}
-                      <div 
+                      <div
                         className="p-4 rounded-lg border border-gray-300 dark:border-gray-600"
-                        style={{ 
+                        style={{
                           backgroundColor: contrastBackground,
                           color: contrastForeground
                         }}
                       >
-                        <div className="space-y-2">
-                          <div className="text-lg font-bold">Sample Text</div>
-                          <div className="text-base">Regular paragraph text for reading</div>
-                          <div className="text-sm">Small text for details</div>
+                        <div className="space-y-3">
+                          <div className="font-semibold mb-2 text-gray-500 text-xs uppercase tracking-wider">
+                            {textSize === 'normal' ? 'Normal Text Preview' : 'Large Text Preview'}
+                          </div>
+                          {textSize === 'normal' ? (
+                            <>
+                              <div className="text-base">Sample heading text</div>
+                              <div className="text-sm">Regular paragraph text for reading and general content</div>
+                              <div className="text-xs">Small text for captions and fine print</div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="text-xl font-bold">Large heading text</div>
+                              <div className="text-lg">Large paragraph text for better readability</div>
+                              <div className="text-base font-semibold">Large bold text for emphasis</div>
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -658,6 +703,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                             <span>{actualContrast >= 4.5 ? '✅' : '❌'}</span>
                             <span>AAA Large Text (4.5:1)</span>
                           </div>
+
                         </div>
                       </div>
                     </>
@@ -665,6 +711,12 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 })()}
               </div>
             </div>
+            <div>
+                <div className={`mt-6 flex gap-2 flex-col`}>
+                  <span>Normal text is below 18pt (~24px) regular weight OR below 14pt (~18.66px) if it’s bold</span>
+                  <span>Large Text is at least 18pt (~24px) regular weight OR at least 14pt (~18.66px) bold</span>
+                </div>
+              </div>
 
             <div className="mt-6 flex justify-end">
               <button
