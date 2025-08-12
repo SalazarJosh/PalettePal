@@ -4,6 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Palette } from '@/types';
 import PaletteEditor from './PaletteEditor';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGithub, faTwitter, faLinkedin, faReact } from '@fortawesome/free-brands-svg-icons';
+import { faCode } from '@fortawesome/free-solid-svg-icons';
 
 interface PaletteCardProps {
   palette: Palette;
@@ -23,7 +26,7 @@ function PaletteCard({ palette, onDuplicate, onDelete, onExport, onEdit }: Palet
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
     const b = parseInt(hexColor.slice(5, 7), 16);
-    
+
     // Calculate relative luminance
     const getLuminance = (r: number, g: number, b: number) => {
       const [rs, gs, bs] = [r, g, b].map(c => {
@@ -32,19 +35,19 @@ function PaletteCard({ palette, onDuplicate, onDelete, onExport, onEdit }: Palet
       });
       return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
     };
-    
+
     const backgroundLuminance = getLuminance(r, g, b);
     const whiteLuminance = 1;
     const blackLuminance = 0;
-    
+
     // Calculate contrast ratios
     const whiteContrast = (whiteLuminance + 0.05) / (backgroundLuminance + 0.05);
     const blackContrast = (backgroundLuminance + 0.05) / (blackLuminance + 0.05);
-    
+
     // Choose the color with better contrast
     const useWhite = whiteContrast > blackContrast;
     const contrastRatio = useWhite ? whiteContrast : blackContrast;
-    
+
     return {
       textColor: useWhite ? '#ffffff' : '#000000',
       contrastRatio: Math.round(contrastRatio * 100) / 100
@@ -62,7 +65,7 @@ function PaletteCard({ palette, onDuplicate, onDelete, onExport, onEdit }: Palet
                 <div
                   key={index}
                   className="flex-1 h-8"
-                  style={{ 
+                  style={{
                     backgroundColor: color.color,
                     color: textColor
                   }}
@@ -77,7 +80,7 @@ function PaletteCard({ palette, onDuplicate, onDelete, onExport, onEdit }: Palet
           </div>
         )}
       </div>
-      
+
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
           {palette.name}
@@ -86,7 +89,7 @@ function PaletteCard({ palette, onDuplicate, onDelete, onExport, onEdit }: Palet
           {colorCount} color{colorCount !== 1 ? 's' : ''} • {lastModified}
         </p>
       </div>
-      
+
       <div className="flex gap-2 flex-wrap">
         <button
           onClick={() => onEdit(palette.id)}
@@ -153,7 +156,7 @@ export default function Gallery() {
     console.log('Gallery: Recalculating filteredPalettes, palettes count:', palettes.length);
     console.log('Gallery: Palettes data:', palettes.map(p => ({ id: p.id, name: p.name, updatedAt: p.updatedAt })));
     return palettes
-      .filter(palette => 
+      .filter(palette =>
         palette.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => {
@@ -223,12 +226,12 @@ export default function Gallery() {
     const dataStr = JSON.stringify(palette, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = `${palette.name.replace(/[^a-z0-9]/gi, '_')}.json`;
     link.click();
-    
+
     URL.revokeObjectURL(url);
   };
 
@@ -251,16 +254,16 @@ export default function Gallery() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    
+
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const paletteData = JSON.parse(e.target?.result as string);
-          
+
           // Import as single palette
           if (paletteData.colors && Array.isArray(paletteData.colors)) {
             const importedPalette: Palette = {
@@ -276,7 +279,7 @@ export default function Gallery() {
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString()
             };
-            
+
             addPalette(importedPalette);
             alert('Palette imported successfully!');
           } else {
@@ -288,7 +291,7 @@ export default function Gallery() {
       };
       reader.readAsText(file);
     };
-    
+
     input.click();
   };
 
@@ -302,16 +305,16 @@ export default function Gallery() {
       totalPalettes: palettes.length,
       autoSaveEnabled: autoSaveEnabled
     };
-    
+
     const dataStr = JSON.stringify(backupData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = `PalettePal_Backup_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    
+
     URL.revokeObjectURL(url);
     alert('Backup downloaded successfully!');
   };
@@ -320,25 +323,25 @@ export default function Gallery() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
-    
+
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const backupData = JSON.parse(e.target?.result as string);
-          
+
           if (!backupData.app || backupData.app !== 'PalettePal') {
             alert('Invalid backup file format.');
             return;
           }
-          
+
           const totalPalettes = backupData.totalPalettes || backupData.palettes.length;
           const totalColors = backupData.totalColors || 0;
           const backupDate = backupData.backupDate ? new Date(backupData.backupDate).toLocaleDateString() : 'Unknown';
-          
+
           if (confirm(`Import backup from ${backupDate}?\n\n${totalPalettes} palettes, ${totalColors} colors\n\nThis will replace all current data.`)) {
             updatePalettes(backupData.palettes || []);
             alert('Backup imported successfully!');
@@ -349,14 +352,14 @@ export default function Gallery() {
       };
       reader.readAsText(file);
     };
-    
+
     input.click();
   };
 
   const handleClearAllData = () => {
     const totalPalettes = palettes.length;
     const totalColors = palettes.reduce((sum, p) => sum + p.colors.length, 0);
-    
+
     if (confirm(`Delete all ${totalPalettes} palettes and ${totalColors} colors? This cannot be undone.`)) {
       const defaultPalette: Palette = {
         id: 'default',
@@ -388,104 +391,127 @@ export default function Gallery() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">PalettePal</h1>
-              <p className="text-sm text-gray-500">Your Color Palette Collection</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowNewPalette(true)}
-                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
-              >
-                + New Palette
-              </button>
-              <button
-                onClick={() => setShowWelcomeModal(true)}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                About
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="sticky-footer-container bg-gray-50 dark:bg-gray-900">
+      <div className="sticky-footer-content">
+        {/* Header */}
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-16">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">PalettePal</h1>
+                <p className="text-sm text-gray-500">Your Color Palette Collection</p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowNewPalette(true)}
+                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                >
+                  + New Palette
+                </button>
 
-      {/* Controls */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
-          <div className="flex gap-4 items-center flex-1">
-            <input
-              type="search"
-              placeholder="Search palettes..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            >
-              <option value="recent">Recently Modified</option>
-              <option value="name">Name (A-Z)</option>
-              <option value="colors">Color Count</option>
-              <option value="oldest">Oldest First</option>
-            </select>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleImportPalette}
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    Import
+                  </button>
+                  <button
+                    onClick={handleBackupData}
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    Backup
+                  </button>
+                  <button
+                    onClick={() => setShowSettings(true)}
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    Settings
+                  </button>
+                  <button
+                    onClick={() => setShowWelcomeModal(true)}
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    About
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
-            >
-              ⊞
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
-            >
-              ☰
-            </button>
-          </div>
-        </div>
+        </header>
 
-        {/* Gallery */}
-        {filteredPalettes.length > 0 ? (
-          <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-            {filteredPalettes.map(palette => (
-              <PaletteCard
-                key={palette.id}
-                palette={palette}
-                onDuplicate={handleDuplicate}
-                onDelete={handleDelete}
-                onExport={handleExport}
-                onEdit={handleEdit}
+        {/* Controls */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
+            <div className="flex gap-4 items-center flex-1">
+              <input
+                type="search"
+                placeholder="Search palettes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🎨</div>
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-              {searchTerm ? 'No palettes found' : 'No palettes yet'}
-            </h2>
-            <p className="text-gray-500 mb-6">
-              {searchTerm ? 'Try adjusting your search term' : 'Create your first color palette to get started!'}
-            </p>
-            {!searchTerm && (
-              <button
-                onClick={() => setShowNewPalette(true)}
-                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
-                Create Your First Palette
+                <option value="recent">Recently Modified</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="colors">Color Count</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+              >
+                ⊞
               </button>
-            )}
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-primary-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'}`}
+              >
+                ☰
+              </button>
+            </div>
           </div>
-        )}
+
+          {/* Gallery */}
+          {filteredPalettes.length > 0 ? (
+            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+              {filteredPalettes.map(palette => (
+                <PaletteCard
+                  key={palette.id}
+                  palette={palette}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDelete}
+                  onExport={handleExport}
+                  onEdit={handleEdit}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="text-6xl mb-4">🎨</div>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                {searchTerm ? 'No palettes found' : 'No palettes yet'}
+              </h2>
+              <p className="text-gray-500 mb-6">
+                {searchTerm ? 'Try adjusting your search term' : 'Create your first color palette to get started!'}
+              </p>
+              {!searchTerm && (
+                <button
+                  onClick={() => setShowNewPalette(true)}
+                  className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                >
+                  Create Your First Palette
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Footer */}
@@ -496,25 +522,32 @@ export default function Gallery() {
               {palettes.length} palette{palettes.length !== 1 ? 's' : ''} • {' '}
               {palettes.reduce((sum, p) => sum + p.colors.length, 0)} color{palettes.reduce((sum, p) => sum + p.colors.length, 0) !== 1 ? 's' : ''}
             </div>
-            <div className="flex gap-3">
-              <button 
-                onClick={handleImportPalette}
-                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                Import
-              </button>
-              <button 
-                onClick={handleBackupData}
-                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                Backup
-              </button>
-              <button
-                onClick={() => setShowSettings(true)}
-                className="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                Settings
-              </button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <FontAwesomeIcon icon={faCode} className="text-blue-500 w-4 h-4" />
+                <span>by Josh using</span>
+                <FontAwesomeIcon icon={faReact} className="text-blue-500 w-4 h-4" />
+              </div>
+              <div className="flex gap-3">
+                <a
+                  href="https://github.com/SalazarJosh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  title="GitHub"
+                >
+                  <FontAwesomeIcon icon={faGithub} className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/in/joshuasalazar1/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  title="LinkedIn"
+                >
+                  <FontAwesomeIcon icon={faLinkedin} className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -561,7 +594,7 @@ export default function Gallery() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Settings</h2>
-            
+
             <div className="space-y-6">
               {/* Auto-save Settings */}
               <div>
@@ -577,11 +610,10 @@ export default function Gallery() {
                   </div>
                   <button
                     onClick={toggleAutoSave}
-                    className={`px-4 py-2 rounded-lg transition-colors ${
-                      autoSaveEnabled 
-                        ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500' 
+                    className={`px-4 py-2 rounded-lg transition-colors ${autoSaveEnabled
+                        ? 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                         : 'bg-primary-500 text-white hover:bg-primary-600'
-                    }`}
+                      }`}
                   >
                     {autoSaveEnabled ? 'Disable' : 'Enable'}
                   </button>
@@ -634,7 +666,6 @@ export default function Gallery() {
                 </div>
               </div>
             </div>
-
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setShowSettings(false)}

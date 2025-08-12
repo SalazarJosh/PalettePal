@@ -65,3 +65,14 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Sticky footer utility */
+.sticky-footer-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.sticky-footer-content {
+  flex: 1;
+}
