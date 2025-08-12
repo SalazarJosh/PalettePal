@@ -4,9 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Palette } from '@/types';
 import PaletteEditor from './PaletteEditor';
+import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub, faLinkedin, faReact } from '@fortawesome/free-brands-svg-icons';
-import { faCode, faCheckSquare, faPause, faPalette, faThLarge, faBars, faSave, faFolder, faTrash, faChartBar, faDatabase, faStar, faEye, faGear, faMagic } from '@fortawesome/free-solid-svg-icons';
+import { faCheckSquare, faPause, faPalette, faThLarge, faBars, faSave, faFolder, faTrash, faChartBar, faDatabase, faStar, faEye, faGear, faMagic } from '@fortawesome/free-solid-svg-icons';
 
 interface PaletteCardProps {
   palette: Palette;
@@ -519,43 +519,9 @@ export default function Gallery() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-500">
-              {palettes.length} palette{palettes.length !== 1 ? 's' : ''} • {' '}
-              {palettes.reduce((sum, p) => sum + p.colors.length, 0)} color{palettes.reduce((sum, p) => sum + p.colors.length, 0) !== 1 ? 's' : ''}
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <FontAwesomeIcon icon={faCode} className="text-blue-500 w-4 h-4" />
-                <span>by Josh using</span>
-                <FontAwesomeIcon icon={faReact} className="text-blue-500 w-4 h-4" />
-              </div>
-              <div className="flex gap-3">
-                <a
-                  href="https://github.com/SalazarJosh"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                  title="GitHub"
-                >
-                  <FontAwesomeIcon icon={faGithub} className="w-5 h-5" />
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/joshuasalazar1/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-                  title="LinkedIn"
-                >
-                  <FontAwesomeIcon icon={faLinkedin} className="w-5 h-5" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer 
+        statsText={`${palettes.length} palette${palettes.length !== 1 ? 's' : ''} • ${palettes.reduce((sum, p) => sum + p.colors.length, 0)} color${palettes.reduce((sum, p) => sum + p.colors.length, 0) !== 1 ? 's' : ''}`}
+      />
 
       {/* New Palette Modal */}
       {showNewPalette && (
@@ -564,13 +530,19 @@ export default function Gallery() {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">New Palette</h3>
             <input
               type="text"
-              placeholder="Enter palette name"
+              placeholder="Enter palette name (max 15 chars)"
               value={newPaletteName}
-              onChange={(e) => setNewPaletteName(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value.length <= 15) {
+                  setNewPaletteName(value);
+                }
+              }}
               onKeyDown={(e) => e.key === 'Enter' && handleCreatePalette()}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-2"
               autoFocus
             />
+            <p className="text-gray-500 text-xs mb-4">{newPaletteName.length}/15 characters</p>
             <div className="flex gap-3">
               <button
                 onClick={handleCreatePalette}

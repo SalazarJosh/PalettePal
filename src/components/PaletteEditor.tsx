@@ -4,8 +4,27 @@ import { useState, useEffect } from 'react';
 import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Color, Palette } from '@/types';
 import Link from 'next/link';
+import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPalette, faClipboard, faCheck, faEdit, faPlus, faExclamationTriangle, faTimes, faSearch, faXmark, faCircle, faAdjust } from '@fortawesome/free-solid-svg-icons';
+
+// Validation functions
+function isValidHexColor(hex: string): boolean {
+  // Check if it's a valid 6-character hex color (with or without #)
+  const hexRegex = /^#?[0-9A-Fa-f]{6}$/;
+  return hexRegex.test(hex);
+}
+
+function normalizeHexColor(hex: string): string {
+  // Ensure hex starts with # and is uppercase
+  const cleaned = hex.replace('#', '').toUpperCase();
+  return `#${cleaned}`;
+}
+
+function truncateWithEllipsis(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength - 3) + '...';
+}
 
 // Utility function to calculate contrast ratio between two colors
 function calculateContrastRatio(foreground: string, background: string): number {
@@ -235,8 +254,8 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
                   <>
                     <div className="flex-1">
                       {color.name && (
-                        <div className="font-semibold text-lg mb-1 text-shadow-sm truncate w-full">
-                          {color.name}
+                        <div className="font-semibold text-lg mb-1 text-shadow-sm truncate w-full" title={color.name}>
+                          {truncateWithEllipsis(color.name, 10)}
                         </div>
                       )}
                       <div className="font-mono text-xs opacity-90">
@@ -343,7 +362,9 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
                       <div className="flex items-center justify-center gap-1 mb-1">
                         <FontAwesomeIcon icon={faCircle} className="opacity-70" style={{ fontSize: '.3rem' }} />
                         {color.name && (
-                          <span className="font-semibold text-lg truncate">{color.name}</span>
+                          <span className="font-semibold text-lg truncate" title={color.name}>
+                            {truncateWithEllipsis(color.name, 10)}
+                          </span>
                         )}
                       </div>
                       <div className="font-mono text-xs opacity-90">
@@ -445,6 +466,12 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   const [textSize, setTextSize] = useState<'normal' | 'large'>('normal');
   const [copyNotification, setCopyNotification] = useState<string | null>(null);
   const [showShadesTints, setShowShadesTints] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<{ show: boolean; existingIndex: number } | null>(null);
+  
+  // Validation states
+  const [hexError, setHexError] = useState<string | null>(null);
+  const [colorNameError, setColorNameError] = useState<string | null>(null);
+  const [paletteNameError, setPaletteNameError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isLoaded) {
@@ -455,6 +482,11 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
       }
     }
   }, [paletteId, getPalette, isLoaded, isEditingName]);
+
+  // Clear duplicate warning when color changes
+  useEffect(() => {
+    setDuplicateWarning(null);
+  }, [selectedColor]);
 
   if (!isLoaded) {
     return (
@@ -506,10 +538,44 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   const handleSaveColor = () => {
     if (!palette) return;
 
+    // Clear previous errors
+    setHexError(null);
+    setColorNameError(null);
+
+    // Validate hex color
+    if (!isValidHexColor(selectedColor)) {
+      setHexError('Please enter a valid 6-character hex color (e.g., #FF0000)');
+      return;
+    }
+
+    // Validate color name length
+    if (colorName.trim().length > 10) {
+      setColorNameError('Color name must be 10 characters or less');
+      return;
+    }
+
+    // Normalize the hex color
+    const normalizedHex = normalizeHexColor(selectedColor);
+
     const newColor: Color = {
-      color: selectedColor,
+      color: normalizedHex,
       name: colorName.trim() || null
     };
+
+    // Check for duplicate colors (both when adding and editing)
+    const existingColorIndex = palette.colors.findIndex((color, index) => 
+      color.color.toLowerCase() === normalizedHex.toLowerCase() && 
+      index !== editingIndex // Exclude the color being edited
+    );
+    
+    if (existingColorIndex !== -1 && !duplicateWarning) {
+      // Color already exists, show warning
+      setDuplicateWarning({ show: true, existingIndex: existingColorIndex });
+      return;
+    }
+
+    // Clear any duplicate warning
+    setDuplicateWarning(null);
 
     let newColors: Color[];
     if (editingIndex !== null) {
@@ -524,7 +590,48 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     updatePalette(palette.id, { colors: newColors });
     console.log('PaletteEditor: Updated palette colors, new count:', newColors.length);
     setPalette({ ...palette, colors: newColors });
+    
+    // Clear all validation errors and close modal
+    setHexError(null);
+    setColorNameError(null);
     setShowColorModal(false);
+  };
+
+  const handleConfirmDuplicate = () => {
+    if (!palette) return;
+
+    // Normalize the hex color
+    const normalizedHex = normalizeHexColor(selectedColor);
+
+    const newColor: Color = {
+      color: normalizedHex,
+      name: colorName.trim() || null
+    };
+
+    let newColors: Color[];
+    if (editingIndex !== null) {
+      // Edit existing color (even if it creates a duplicate)
+      newColors = [...palette.colors];
+      newColors[editingIndex] = newColor;
+    } else {
+      // Add the duplicate color
+      newColors = [...palette.colors, newColor];
+    }
+
+    updatePalette(palette.id, { colors: newColors });
+    console.log('PaletteEditor: Saved color with duplicate confirmation, new count:', newColors.length);
+    setPalette({ ...palette, colors: newColors });
+    
+    // Clear all validation errors and warnings
+    setDuplicateWarning(null);
+    setHexError(null);
+    setColorNameError(null);
+    setShowColorModal(false);
+  };
+
+  const handleCancelDuplicate = () => {
+    setDuplicateWarning(null);
+    // Keep the modal open so user can modify the color
   };
 
   const handleDeleteColor = () => {
@@ -563,6 +670,15 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   const handleSavePaletteName = () => {
     if (!palette || !tempPaletteName.trim()) return;
 
+    // Clear previous error
+    setPaletteNameError(null);
+
+    // Validate palette name length
+    if (tempPaletteName.trim().length > 15) {
+      setPaletteNameError('Palette name must be 15 characters or less');
+      return;
+    }
+
     console.log('PaletteEditor: Saving palette name:', tempPaletteName.trim());
     updatePalette(palette.id, { name: tempPaletteName.trim() });
     setPalette({ ...palette, name: tempPaletteName.trim() });
@@ -572,6 +688,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   const handleCancelNameEdit = () => {
     setTempPaletteName(palette?.name || '');
     setIsEditingName(false);
+    setPaletteNameError(null);
   };
 
   const handleCopyNotification = (message: string) => {
@@ -597,8 +714,9 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
+    <div className="sticky-footer-container bg-gray-50 dark:bg-gray-900">
+      <div className="sticky-footer-content">
+        {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -621,17 +739,33 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
               <div>
                 {isEditingName ? (
                   <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={tempPaletteName}
-                      onChange={(e) => setTempPaletteName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSavePaletteName();
-                        if (e.key === 'Escape') handleCancelNameEdit();
-                      }}
-                      className="text-xl font-bold bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded px-2 py-1"
-                      autoFocus
-                    />
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={tempPaletteName}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value.length <= 15) {
+                            setTempPaletteName(value);
+                            setPaletteNameError(null);
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSavePaletteName();
+                          if (e.key === 'Escape') handleCancelNameEdit();
+                        }}
+                        className={`text-xl font-bold bg-white dark:bg-gray-700 text-gray-900 dark:text-white border rounded px-2 py-1 ${
+                          paletteNameError 
+                            ? 'border-red-500 dark:border-red-400' 
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                        autoFocus
+                      />
+                      {paletteNameError && (
+                        <p className="text-red-500 text-xs mt-1">{paletteNameError}</p>
+                      )}
+                      <p className="text-gray-500 text-xs mt-1">{tempPaletteName.length}/15</p>
+                    </div>
                     <button
                       onClick={handleSavePaletteName}
                       className="px-2 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600 transition-colors"
@@ -779,45 +913,112 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 <div className="flex gap-3 items-center">
                   <input
                     type="color"
-                    value={selectedColor}
-                    onChange={(e) => setSelectedColor(e.target.value)}
+                    value={isValidHexColor(selectedColor) ? selectedColor : '#000000'}
+                    onChange={(e) => {
+                      setSelectedColor(e.target.value);
+                      setHexError(null);
+                    }}
                     className="w-16 h-12 rounded border border-gray-300 dark:border-gray-600"
                   />
-                  <input
-                    type="text"
-                    value={selectedColor}
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    placeholder="#000000"
-                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={selectedColor}
+                      onChange={(e) => {
+                        setSelectedColor(e.target.value);
+                        setHexError(null);
+                      }}
+                      className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                        hexError 
+                          ? 'border-red-500 dark:border-red-400' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder="#000000"
+                    />
+                    {hexError && (
+                      <p className="text-red-500 text-xs mt-1">{hexError}</p>
+                    )}
+                  </div>
                 </div>
-                <button
-                  onClick={() => copyToClipboard(selectedColor)}
-                  className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
-                  title="Copy color code"
-                >
-                  <FontAwesomeIcon icon={faClipboard} className="mr-1" /> Copy
-                </button>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Name (optional)
+                  Name (optional, max 10 chars)
                 </label>
                 <input
                   type="text"
                   value={colorName}
-                  onChange={(e) => setColorName(e.target.value)}
-                  placeholder="e.g., Primary Blue"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 10) {
+                      setColorName(value);
+                      setColorNameError(null);
+                    }
+                  }}
+                  placeholder="e.g., Primary"
+                  className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                    colorNameError 
+                      ? 'border-red-500 dark:border-red-400' 
+                      : 'border-gray-300 dark:border-gray-600'
+                  }`}
                 />
+                <div className="flex justify-between items-center mt-1">
+                  {colorNameError && (
+                    <p className="text-red-500 text-xs">{colorNameError}</p>
+                  )}
+                  <p className="text-gray-500 text-xs ml-auto">{colorName.length}/10</p>
+                </div>
               </div>
             </div>
+
+            {/* Duplicate Warning */}
+            {duplicateWarning?.show && palette && (
+              <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <FontAwesomeIcon icon={faExclamationTriangle} className="text-yellow-600 dark:text-yellow-400 mt-1" />
+                  <div className="flex-1">
+                    <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                      Color Already Exists
+                    </h4>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
+                      The color <strong>{selectedColor.toUpperCase()}</strong> already exists in this palette
+                      {palette.colors[duplicateWarning.existingIndex]?.name && 
+                        ` as "${palette.colors[duplicateWarning.existingIndex].name}"`
+                      }. 
+                      {editingIndex !== null 
+                        ? 'Do you want to change this color to match the existing one?' 
+                        : 'Do you want to add it again?'
+                      }
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleConfirmDuplicate}
+                        className="px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition-colors"
+                      >
+                        {editingIndex !== null ? 'Save Anyway' : 'Add Anyway'}
+                      </button>
+                      <button
+                        onClick={handleCancelDuplicate}
+                        className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleSaveColor}
-                className="flex-1 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                disabled={!!duplicateWarning?.show}
+                className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                  duplicateWarning?.show 
+                    ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
+                    : 'bg-primary-500 text-white hover:bg-primary-600'
+                }`}
               >
                 {editingIndex !== null ? 'Save Changes' : 'Add Color'}
               </button>
@@ -830,7 +1031,12 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 </button>
               )}
               <button
-                onClick={() => setShowColorModal(false)}
+                onClick={() => {
+                  setShowColorModal(false);
+                  setDuplicateWarning(null);
+                  setHexError(null);
+                  setColorNameError(null);
+                }}
                 className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
@@ -842,12 +1048,20 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
 
       {/* Contrast Checker Modal */}
       {showContrastChecker && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              <FontAwesomeIcon icon={faSearch} className="mr-2" />
-              Contrast Checker
-            </h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                <FontAwesomeIcon icon={faSearch} className="mr-3" />
+                Contrast Checker
+              </h2>
+              <button
+                onClick={() => setShowContrastChecker(false)}
+                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              >
+                <FontAwesomeIcon icon={faTimes} className="text-xl" />
+              </button>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Color Selection */}
@@ -887,7 +1101,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                     </div>
                   )}
                 </div>
-
+                <hr className="my-4 border-gray-300 dark:border-gray-600" />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Background Color
@@ -923,7 +1137,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                     </div>
                   )}
                 </div>
-
+                <hr className="my-4 border-gray-300 dark:border-gray-600" />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Text Size
@@ -948,8 +1162,9 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                       Large Text
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {textSize === 'normal' ? 'Regular text (14pt+) and UI components' : 'Large text (18pt+ or 14pt+ bold)'}
+                  <p className="text-xs text-gray-300 mt-2">
+                    {textSize === 'normal' ? 'Normal text is below 18pt (~24px) regular weight OR below 14pt (~18.66px) if it’s bold' :
+                     'Large Text is at least 18pt (~24px) regular weight OR at least 14pt (~18.66px) bold'}
                   </p>
                 </div>
               </div>
@@ -1025,12 +1240,6 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 })()}
               </div>
             </div>
-            <div>
-              <div className={`mt-6 flex gap-2 flex-col`}>
-                <span>Normal text is below 18pt (~24px) regular weight OR below 14pt (~18.66px) if it’s bold</span>
-                <span>Large Text is at least 18pt (~24px) regular weight OR at least 14pt (~18.66px) bold</span>
-              </div>
-            </div>
 
             <div className="mt-6 flex justify-end">
               <button
@@ -1053,6 +1262,10 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
           </div>
         </div>
       )}
+      </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
