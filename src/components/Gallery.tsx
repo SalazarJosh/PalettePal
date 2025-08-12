@@ -164,7 +164,7 @@ export default function Gallery() {
     if (isLoaded && shouldShowWelcome()) {
       setShowWelcomeModal(true);
     }
-  }, [isLoaded]);
+  }, [isLoaded, shouldShowWelcome]);
 
   const filteredPalettes = palettes
     .filter(palette => 
@@ -662,18 +662,18 @@ export default function Gallery() {
               <p>PalettePal is your creative companion for building and managing beautiful color palettes.</p>
               <div className="space-y-3">
                 <div><strong>🎨 Gallery View:</strong> See all your palettes at a glance</div>
-                <div><strong>✨ Quick Start:</strong> Click "New Palette" to create your first collection</div>
+                <div><strong>✨ Quick Start:</strong> Click &quot;New Palette&quot; to create your first collection</div>
                 <div><strong>🎯 Easy Management:</strong> Edit, duplicate, or delete palettes with a click</div>
                 <div><strong>💾 Auto-Save:</strong> Your work is automatically saved to your browser</div>
               </div>
               <p className="text-sm text-gray-500">
-                This tool uses your browser's local storage. Download backups regularly to keep your palettes safe!
+                This tool uses your browser&apos;s local storage. Download backups regularly to keep your palettes safe!
               </p>
             </div>
             <div className="mt-6 flex items-center gap-4">
               <label className="flex items-center gap-2">
                 <input type="checkbox" onChange={(e) => setShowWelcome(!e.target.checked)} />
-                <span className="text-sm text-gray-600 dark:text-gray-300">Don't show this again</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Don&apos;t show this again</span>
               </label>
               <button
                 onClick={() => setShowWelcomeModal(false)}

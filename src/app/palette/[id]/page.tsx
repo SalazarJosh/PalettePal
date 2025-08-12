@@ -1,9 +1,9 @@
 import PaletteEditor from "@/components/PaletteEditor";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // Generate static params for static export
@@ -15,6 +15,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function PalettePage({ params }: PageProps) {
-  return <PaletteEditor paletteId={params.id} />;
+export default async function PalettePage({ params }: PageProps) {
+  const { id } = await params;
+  return <PaletteEditor paletteId={id} />;
 }

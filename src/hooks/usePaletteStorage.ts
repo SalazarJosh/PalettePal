@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Palette, AppData } from '@/types';
 
 const STORAGE_KEY = 'palettePal_data';
@@ -51,7 +51,7 @@ export function usePaletteStorage() {
   }, []);
 
   // Save data to localStorage
-  const saveToStorage = (newPalettes: Palette[], newAutoSave: boolean = autoSaveEnabled) => {
+  const saveToStorage = useCallback((newPalettes: Palette[], newAutoSave: boolean = autoSaveEnabled) => {
     if (typeof window === 'undefined') return;
 
     try {
@@ -65,14 +65,14 @@ export function usePaletteStorage() {
     } catch (error) {
       console.error('Error saving to storage:', error);
     }
-  };
+  }, [autoSaveEnabled]);
 
   // Auto-save effect
   useEffect(() => {
     if (isLoaded && autoSaveEnabled && palettes.length > 0) {
       saveToStorage(palettes, autoSaveEnabled);
     }
-  }, [palettes, autoSaveEnabled, isLoaded]);
+  }, [palettes, autoSaveEnabled, isLoaded, saveToStorage]);
 
   const updatePalettes = (newPalettes: Palette[]) => {
     setPalettes(newPalettes);
