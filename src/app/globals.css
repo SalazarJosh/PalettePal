@@ -76,3 +76,8 @@ body {
 .sticky-footer-content {
   flex: 1;
 }
+
+
+.swatch-button:hover > span{
+  opacity: 100;
+}
