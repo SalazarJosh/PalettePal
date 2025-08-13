@@ -1,56 +1,59 @@
-# PalettePal Next.js
+# PalettePal
 
 A modern React-based color palette management tool built with Next.js, TypeScript, and Tailwind CSS. An accessibility-first color palette tool with advanced features for designers and developers.
+
+> [!NOTE]  
+> This README is auto-generated using GitHub Copilot
 
 ## Features
 
 ### Core Functionality
-- 🎨 **Gallery View** - Browse all your palettes at a glance with grid/list views
-- ✏️ **Palette Editor** - Create and edit color palettes with intuitive interface
-- 🔍 **Search & Sort** - Find palettes by name, sort by date, name, or color count
-- 📱 **Responsive Design** - Works seamlessly on desktop and mobile
-- 💾 **Auto-Save** - Automatic saving to browser localStorage with manual save option
-- 📁 **Import/Export** - Import and export individual palettes or full backups
-- 🌙 **Dark Mode** - Supports system dark mode preference
-- ⚡ **Fast Performance** - Built with Next.js static export for optimal loading
+- **Gallery View** - Browse all your palettes at a glance with grid/list views
+- **Palette Editor** - Create and edit color palettes with intuitive interface
+- **Search & Sort** - Find palettes by name, sort by date, name, or color count
+- **Responsive Design** - Works seamlessly on desktop and mobile
+- **Auto-Save** - Automatic saving to browser localStorage with manual save option
+- **Import/Export** - Import and export individual palettes or full backups
+- **Dark Mode** - Supports system dark mode preference
+- **Fast Performance** - Built with Next.js static export for optimal loading
 
 ### Advanced Color Features
-- 🎲 **Palette Generation** - Generate random palettes using color theory algorithms:
+- **Palette Generation** - Generate random palettes using color theory algorithms:
   - Monochromatic (same hue, different saturations/lightness)
   - Analogous (adjacent colors on color wheel)
   - Complementary (opposite colors)
   - Triadic (evenly spaced colors)
   - Warm palettes (reds, oranges, yellows)
   - Cool palettes (blues, cyans, purples)
-- 🌈 **Shades & Tints** - View automatic color variations with horizontal band overlay
-- 📋 **Click-to-Copy** - Copy hex codes by clicking any color or variation
-- 🔄 **Duplicate Detection** - Smart warnings when adding duplicate colors
+- **Shades & Tints** - View automatic color variations with horizontal band overlay
+- **Click-to-Copy** - Copy hex codes by clicking any color or variation
+- **Duplicate Detection** - Smart warnings when adding duplicate colors
 
 ### Accessibility & Design
-- ♿ **Contrast Checker** - Built-in WCAG compliance checker with:
+- **Contrast Checker** - Built-in WCAG compliance checker with:
   - Real-time contrast ratio calculation
   - AA/AAA compliance indicators
   - Preview with normal/large text sizes
   - Quick palette color selection
-- 🎯 **Visual Accessibility** - High contrast buttons and clear visual hierarchy
-- 📏 **View Options** - Compact (4 columns) and Detailed (2 columns) grid views
-- 📱 **Mobile-First** - Optimized touch interfaces and responsive layouts
+- **Visual Accessibility** - High contrast buttons and clear visual hierarchy
+- **View Options** - Compact (4 columns) and Detailed (2 columns) grid views
+- **Mobile-First** - Optimized touch interfaces and responsive layouts
 
 ### Input Validation & UX
-- ✅ **Smart Validation** - Input validation for:
+- **Smart Validation** - Input validation for:
   - Hex colors (6-character format with auto-normalization)
   - Color names (10 character limit with counter)
   - Palette names (15 character limit with counter)
-- 📝 **Character Limits** - Real-time character counting and enforcement
-- 🔤 **Text Truncation** - Automatic ellipsis for long names with hover tooltips
-- 🚨 **Error Handling** - Clear error messages with visual feedback
+- **Character Limits** - Real-time character counting and enforcement
+- **Text Truncation** - Automatic ellipsis for long names with hover tooltips
+- **Error Handling** - Clear error messages with visual feedback
 
 ### User Experience
-- 🏷️ **Inline Editing** - Click to edit palette and color names directly
-- 🗂️ **Sticky Footer** - Consistent branding and stats across all pages
-- 🔔 **Notifications** - Success feedback for copy actions and palette generation
-- 📊 **Statistics** - Live count of palettes and colors in footer
-- 🎛️ **Settings Panel** - Auto-save toggle, data management, and storage info
+- **Inline Editing** - Click to edit palette and color names directly
+- **Sticky Footer** - Consistent branding and stats across all pages
+- **Notifications** - Success feedback for copy actions and palette generation
+- **Statistics** - Live count of palettes and colors in footer
+- **Settings Panel** - Auto-save toggle, data management, and storage info
 
 ## Technology Stack
 
@@ -184,15 +187,15 @@ The project follows modern React and TypeScript best practices:
 ## Recent Updates
 
 ### Version 2.0 Features
-- ✨ **Random Palette Generation** - Six color theory algorithms
-- 🎨 **Shades & Tints Visualization** - Horizontal band overlay system
-- ♿ **Enhanced Accessibility** - WCAG compliance checker with live preview
-- 🔍 **Duplicate Detection** - Smart warnings for duplicate colors
-- ✅ **Input Validation** - Character limits and format validation
-- 📝 **Text Truncation** - Ellipsis handling with hover tooltips
-- 🏷️ **Inline Editing** - Click-to-edit for names and labels
-- 🗂️ **Sticky Footer** - Consistent UI with optional statistics
-- 📱 **Mobile Optimization** - Touch-friendly interfaces and responsive design
+- **Random Palette Generation** - Six color theory algorithms
+- **Shades & Tints Visualization** - Horizontal band overlay system
+- **Enhanced Accessibility** - WCAG compliance checker with live preview
+- **Duplicate Detection** - Smart warnings for duplicate colors
+- **Input Validation** - Character limits and format validation
+- **Text Truncation** - Ellipsis handling with hover tooltips
+- **Inline Editing** - Click-to-edit for names and labels
+- **Sticky Footer** - Consistent UI with optional statistics
+- **Mobile Optimization** - Touch-friendly interfaces and responsive design
 
 ### Accessibility Improvements
 - **Contrast Ratios** - Real-time WCAG AA/AAA compliance checking
@@ -200,24 +203,6 @@ The project follows modern React and TypeScript best practices:
 - **Screen Reader Support** - Proper ARIA labels and semantic HTML
 - **High Contrast** - Clear visual hierarchy and color-blind friendly design
 - **Touch Targets** - Mobile-optimized button sizes and spacing
-
-## Migration from Vanilla Version
-
-This Next.js version significantly extends the original vanilla HTML/CSS/JS version with:
-
-### Enhanced Features
-- **Modern Architecture** - React component system with TypeScript
-- **Advanced Color Tools** - Palette generation and shades/tints
-- **Accessibility Tools** - Built-in contrast checker and WCAG compliance
-- **Input Validation** - Real-time validation with error handling
-- **Better UX** - Inline editing, notifications, and responsive design
-- **Professional UI** - Font Awesome icons and polished interface
-
-### Performance Improvements
-- **Next.js Optimizations** - Static generation and code splitting
-- **React Hooks** - Efficient state management and re-rendering
-- **TypeScript Benefits** - Compile-time error detection and IntelliSense
-- **Tailwind CSS** - Optimized CSS bundle with unused style purging
 
 ## Contributing
 
