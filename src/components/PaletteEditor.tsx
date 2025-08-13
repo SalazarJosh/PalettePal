@@ -1020,28 +1020,40 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     <div className="sticky-footer-container bg-gray-50 dark:bg-gray-900">
       <div className="sticky-footer-content">
         {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-6">
-              <Logo size="medium" showText={true} linkToHome={true} />
-              <div className="flex items-center gap-4">
+        <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex justify-between items-center h-16">
+              <div className="flex items-center gap-6">
+                <Logo size="medium" showText={true} linkToHome={true} />
+              </div>
+            </div>
+          </div>
+        </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto">
+        {/* Navigation and Title */}
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex-col items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div>
+                <div>
               {onBack ? (
                 <button
                   onClick={onBack}
-                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="mb-4 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   ← Gallery
                 </button>
               ) : (
                 <Link
                   href="/"
-                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  className="mb-4 px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
                   ← Gallery
                 </Link>
               )}
-              <div>
+            </div>
                 {isEditingName ? (
                   <div className="flex items-center gap-2">
                     <div className="flex-1">
@@ -1086,7 +1098,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-white">{palette.name}</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{palette.name}</h1>
                     <button
                       onClick={() => setIsEditingName(true)}
                       className="px-2 py-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
@@ -1098,29 +1110,11 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 )}
                 {!isEditingName ? <p className="text-sm text-gray-500" id="colorCount">{palette.colors.length} colors</p> : null}
               </div>
-              </div>
             </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleClearPalette}
-                disabled={palette.colors.length === 0}
-                className="px-4 py-2 bg-red-50 dark:bg-red-700 text-red-600 dark:text-red-50 rounded-lg hover:bg-red-100 dark:hover:bg-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Clear All
-              </button>
-              <button
-                onClick={handleExportPalette}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-              >
-                Export
-              </button>
-            </div>
+            
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto">
         {/* Palette Controls */}
         <div className="px-6 py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -1152,23 +1146,38 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 Shades & Tints
               </button>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                View:
-              </label>
-              <select
-                value={palette.gridSize === 'large' ? 'compact' : 'detailed'}
-                onChange={(e) => {
-                  const newView = e.target.value as 'compact' | 'detailed';
-                  const newGridSize = newView === 'compact' ? 'large' : 'small';
-                  updatePalette(palette.id, { gridSize: newGridSize });
-                  setPalette({ ...palette, gridSize: newGridSize });
-                }}
-                className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleClearPalette}
+                disabled={palette.colors.length === 0}
+                className="px-4 py-2 bg-red-50 dark:bg-red-700 text-red-600 dark:text-red-50 rounded-lg hover:bg-red-100 dark:hover:bg-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <option value="compact">Compact</option>
-                <option value="detailed">Detailed</option>
-              </select>
+                Clear All
+              </button>
+              <button
+                onClick={handleExportPalette}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              >
+                Export
+              </button>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  View:
+                </label>
+                <select
+                  value={palette.gridSize === 'large' ? 'compact' : 'detailed'}
+                  onChange={(e) => {
+                    const newView = e.target.value as 'compact' | 'detailed';
+                    const newGridSize = newView === 'compact' ? 'large' : 'small';
+                    updatePalette(palette.id, { gridSize: newGridSize });
+                    setPalette({ ...palette, gridSize: newGridSize });
+                  }}
+                  className="px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                >
+                  <option value="compact">Compact</option>
+                  <option value="detailed">Detailed</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
