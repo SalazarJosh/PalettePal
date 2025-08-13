@@ -111,7 +111,7 @@ function PaletteCard({ palette, onDuplicate, onDelete, onExport, onEdit }: Palet
         </button>
         <button
           onClick={() => onDelete(palette.id)}
-          className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+          className="px-3 py-1 bg-red-50 dark:bg-red-700 text-red-600 dark:text-red-50 rounded-lg text-sm hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
         >
           Delete
         </button>
