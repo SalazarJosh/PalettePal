@@ -426,7 +426,7 @@ export default function Gallery() {
         </header>
 
         {/* Controls */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <button

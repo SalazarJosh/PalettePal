@@ -740,8 +740,8 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4 text-purple-500">
-            <FontAwesomeIcon icon={faPalette} />
+          <div className="text-4xl mb-4">
+              <Logo isCentered={true} isAnimated={true} size="extraLarge" showText={false} linkToHome={false} />
           </div>
           <div className="text-lg text-gray-600">Loading palette...</div>
         </div>
@@ -1031,10 +1031,10 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
         </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto">
+      <main className="max-w-7xl mx-auto px-6">
         {/* Navigation and Title */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex-col items-center justify-between">
+        <div className="py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div>
                 <div>
@@ -1116,7 +1116,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
         </div>
 
         {/* Palette Controls */}
-        <div className="px-6 py-4">
+        <div className="py-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               {palette.colors.length > 0 && (
