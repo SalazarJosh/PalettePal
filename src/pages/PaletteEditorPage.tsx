@@ -109,54 +109,280 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
         setDragOverIndex(null);
     };
 
-    // Color grid rendering logic would go here...
-    // For brevity, I'll include a simplified version
-
     return (
         <div className={`grid ${gridCols} gap-4 p-6`}>
-            {colors.map((color, index) => (
-                <div
-                    key={index}
-                    className="relative transition-all duration-200 group overflow-hidden cursor-move"
-                    style={{
-                        backgroundColor: color.color,
-                        aspectRatio: '2/1',
-                        minHeight: '80px'
-                    }}
-                >
-                    {/* Simplified color display - full implementation would include shades/tints logic */}
-                    <button
-                        onClick={() => copyToClipboard(color.color)}
-                        className="absolute inset-0 w-full h-full flex justify-between items-center p-3"
-                        style={{ color: getTextColorAndContrast(color.color).textColor }}
-                    >
-                        <div className="flex-1">
-                            {color.name && (
-                                <div className="font-semibold text-lg mb-1">{color.name}</div>
-                            )}
-                            <div className="font-mono text-xs">{color.color.toUpperCase()}</div>
+            {colors.map((color, index) => {
+                const { textColor, contrastRatio } = getTextColorAndContrast(color.color);
+                const isDragged = draggedIndex === index;
+                const isDraggedOver = dragOverIndex === index;
+
+                if (!showShadesTints) {
+                    // Normal single color display
+                    return (
+                        <div
+                            key={index}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, index)}
+                            onDragEnd={handleDragEnd}
+                            className={`relative transition-all duration-200 group overflow-hidden cursor-move ${
+                                isDragged ? 'opacity-50 scale-95' : ''
+                            } ${
+                                isDraggedOver ? 'ring-2 ring-primary-500 ring-offset-2' : ''
+                            }`}
+                            style={{
+                                backgroundColor: color.color,
+                                aspectRatio: '2/1',
+                                minHeight: '80px'
+                            }}
+                        >
+                            {/* Drag handle */}
+                            <div 
+                                className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black bg-opacity-20 hover:bg-opacity-40 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity z-20 cursor-move"
+                                title="Drag to reorder"
+                            >
+                                <FontAwesomeIcon icon={faGripVertical} />
+                            </div>
+
+                            {/* Main display area - clickable for copying */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyToClipboard(color.color);
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                className={isCompactView ? "swatch-button absolute inset-0 w-full h-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity" : "absolute inset-0 w-full h-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity"}
+                                style={{ color: textColor }}
+                                title={`Click to copy ${color.color}`}
+                            >
+                                {!isCompactView ? (
+                                    <>
+                                        <div className="flex-1">
+                                            {color.name && (
+                                                <div className="font-semibold text-lg mb-1 text-shadow-sm truncate w-full" title={color.name}>
+                                                    {truncateWithEllipsis(color.name, 10)}
+                                                </div>
+                                            )}
+                                            <div className="font-mono text-xs opacity-90">
+                                                <span>{color.color.toUpperCase()}</span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right text-xs opacity-80 ml-2">
+                                            <div className="font-mono font-bold">
+                                                {contrastRatio}:1
+                                            </div>
+                                            <div className="text-xs opacity-70">
+                                                {contrastRatio >= 7 ? 'AAA' : contrastRatio >= 4.5 ? 'AA' : contrastRatio >= 3 ? 'AA Large' : 'Fail'}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    // Compact view - no text content
+                                    <span className="flex-1 font-mono text-xs opacity-0">
+                                        {color.color.toUpperCase()}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Edit button */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onColorClick(index);
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-sm hover:shadow-md z-30"
+                                style={{
+                                    backgroundColor: textColor === '#ffffff' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
+                                    color: textColor === '#ffffff' ? '#000000' : '#ffffff',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = textColor === '#ffffff' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = textColor === '#ffffff' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)';
+                                }}
+                                title="Edit color"
+                            >
+                                <FontAwesomeIcon icon={faEdit} className="text-xs" />
+                            </button>
                         </div>
-                    </button>
-                    <button
-                        onClick={() => onColorClick(index)}
-                        className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
-                        style={{
-                            backgroundColor: getTextColorAndContrast(color.color).textColor === '#ffffff' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
-                            color: getTextColorAndContrast(color.color).textColor === '#ffffff' ? '#000000' : '#ffffff',
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faEdit} className="text-xs" />
-                    </button>
-                </div>
-            ))}
+                    );
+                } else {
+                    // Shades and tints display as horizontal bands
+                    const { shades, tints } = generateShadesTints(color.color);
+                    const { textColor: originalTextColor, contrastRatio } = getTextColorAndContrast(color.color);
+
+                    // Calculate band heights as percentages
+                    const totalBands = tints.length + 1 + shades.length; // tints + original + shades
+                    const originalHeightPercent = totalBands > 1 ? 50 : 100; // Original gets 50% when there are variations
+                    const variationHeightPercent = totalBands > 1 ? (100 - originalHeightPercent) / (totalBands - 1) : 0;
+
+                    return (
+                        <div
+                            key={index}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, index)}
+                            onDragEnd={handleDragEnd}
+                            className={`relative transition-all duration-200 group overflow-hidden cursor-move ${
+                                isDragged ? 'opacity-50 scale-95' : ''
+                            } ${
+                                isDraggedOver ? 'ring-2 ring-primary-500 ring-offset-2' : ''
+                            }`}
+                            style={{
+                                aspectRatio: '2/1',
+                                minHeight: '80px'
+                            }}
+                        >
+                            {/* Drag handle */}
+                            <div 
+                                className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black bg-opacity-20 hover:bg-opacity-40 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity z-20 cursor-move"
+                                title="Drag to reorder"
+                            >
+                                <FontAwesomeIcon icon={faGripVertical} />
+                            </div>
+
+                            {/* Tints (lighter bands at top) */}
+                            {tints.map((tint, tintIndex) => {
+                                const { textColor } = getTextColorAndContrast(tint);
+                                return (
+                                    <button
+                                        key={`tint-${tintIndex}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            copyToClipboard(tint);
+                                        }}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        className="swatch-button absolute w-full transition-opacity flex items-center justify-center text-xs font-mono group"
+                                        style={{
+                                            backgroundColor: tint,
+                                            color: textColor,
+                                            top: `${tintIndex * variationHeightPercent}%`,
+                                            height: `${variationHeightPercent}%`,
+                                        }}
+                                        title={`Copy ${tint}`}
+                                    >
+                                        <span className="opacity-0 transition-opacity">
+                                            #{tint.slice(1).toUpperCase()}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+
+                            {/* Original color band (larger, in middle) */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    copyToClipboard(color.color);
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                className={isCompactView ? "swatch-button absolute w-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity" : "absolute w-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity"}
+                                style={{
+                                    backgroundColor: color.color,
+                                    color: originalTextColor,
+                                    top: `${tints.length * variationHeightPercent}%`,
+                                    height: `${originalHeightPercent}%`,
+                                }}
+                                title={`Click to copy ${color.color}`}
+                            >
+                                {!isCompactView ? (
+                                    <>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-center gap-1 mb-1">
+                                                <FontAwesomeIcon icon={faCircle} className="opacity-70" style={{ fontSize: '.3rem' }} />
+                                                {color.name && (
+                                                    <span className="font-semibold text-lg truncate" title={color.name}>
+                                                        {truncateWithEllipsis(color.name, 10)}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="font-mono text-xs opacity-90">
+                                                {color.color.toUpperCase()}
+                                            </div>
+                                        </div>
+                                        <div className="text-right text-xs opacity-80 ml-2">
+                                            <div className="font-mono font-bold">
+                                                {contrastRatio}:1
+                                            </div>
+                                            <div className="text-xs opacity-70">
+                                                {contrastRatio >= 7 ? 'AAA' : contrastRatio >= 4.5 ? 'AA' : contrastRatio >= 3 ? 'AA Large' : 'Fail'}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    // Compact view - no text content
+                                    <span className="flex-1 font-mono text-xs opacity-0">
+                                        {color.color.toUpperCase()}
+                                    </span>
+                                )}
+                            </button>
+
+                            {/* Shades (darker bands at bottom) */}
+                            {shades.map((shade, shadeIndex) => {
+                                const { textColor } = getTextColorAndContrast(shade);
+                                return (
+                                    <button
+                                        key={`shade-${shadeIndex}`}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            copyToClipboard(shade);
+                                        }}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        className="swatch-button absolute w-full transition-opacity flex items-center justify-center text-xs font-mono group"
+                                        style={{
+                                            backgroundColor: shade,
+                                            color: textColor,
+                                            top: `${(tints.length * variationHeightPercent) + originalHeightPercent + (shadeIndex * variationHeightPercent)}%`,
+                                            height: `${variationHeightPercent}%`,
+                                        }}
+                                        title={`Copy ${shade}`}
+                                    >
+                                        <span className="opacity-0 transition-opacity">
+                                            #{shade.slice(1).toUpperCase()}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+
+                            {/* Edit button for original */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onColorClick(index);
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                className="absolute top-2 right-2 w-7 h-7 rounded-full transition-all flex items-center justify-center shadow-sm hover:shadow-md z-30"
+                                style={{
+                                    backgroundColor: originalTextColor === '#ffffff' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
+                                    color: originalTextColor === '#ffffff' ? '#000000' : '#ffffff',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = originalTextColor === '#ffffff' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = originalTextColor === '#ffffff' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)';
+                                }}
+                                title="Edit color"
+                            >
+                                <FontAwesomeIcon icon={faEdit} className="text-xs" />
+                            </button>
+                        </div>
+                    );
+                }
+            })}
             {colors.length < maxColors && (
-                <Button
+                <button
                     onClick={onAddColor}
-                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-500 rounded-lg"
+                    className="rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-500 flex items-center justify-center text-gray-400 hover:text-primary-500 transition-colors"
                     style={{ aspectRatio: '2/1', minHeight: '80px' }}
                 >
                     <FontAwesomeIcon icon={faPlus} className="text-2xl" />
-                </Button>
+                </button>
             )}
         </div>
     );
@@ -176,6 +402,12 @@ export default function PaletteEditorPage({ paletteId, onBack }: PaletteEditorPa
     // Additional state
     const [copyNotification, setCopyNotification] = useState<string | null>(null);
     const [showShadesTints, setShowShadesTints] = useState(false);
+    const [duplicateWarning, setDuplicateWarning] = useState<{ show: boolean; existingIndex: number } | null>(null);
+    
+    // Contrast checker state
+    const [contrastForeground, setContrastForeground] = useState('#000000');
+    const [contrastBackground, setContrastBackground] = useState('#ffffff');
+    const [textSize, setTextSize] = useState<'normal' | 'large'>('normal');
 
     // Validation states
     const [hexError, setHexError] = useState<string | null>(null);
@@ -191,6 +423,11 @@ export default function PaletteEditorPage({ paletteId, onBack }: PaletteEditorPa
             }
         }
     }, [paletteId, getPalette, isLoaded, isEditingName]);
+
+    // Clear duplicate warning when color changes
+    useEffect(() => {
+        setDuplicateWarning(null);
+    }, [selectedColor]);
 
     if (!isLoaded) {
         return (
@@ -280,6 +517,112 @@ export default function PaletteEditorPage({ paletteId, onBack }: PaletteEditorPa
 
         setCopyNotification(`Moved ${movedColor.name ? movedColor.name : movedColor.color} to position ${toIndex + 1}`);
         setTimeout(() => setCopyNotification(null), 2000);
+    };
+
+    const handleSaveColor = () => {
+        if (!palette) return;
+
+        // Clear previous errors
+        setHexError(null);
+        setColorNameError(null);
+
+        // Validate hex color
+        if (!isValidHexColor(selectedColor)) {
+            setHexError('Please enter a valid 6-character hex color (e.g., #FF0000)');
+            return;
+        }
+
+        // Validate color name length
+        if (colorName.trim().length > 10) {
+            setColorNameError('Color name must be 10 characters or less');
+            return;
+        }
+
+        // Normalize the hex color
+        const normalizedHex = normalizeHexColor(selectedColor);
+
+        const newColor: Color = {
+            color: normalizedHex,
+            name: colorName.trim() || null
+        };
+
+        // Check for duplicate colors (both when adding and editing)
+        const existingColorIndex = palette.colors.findIndex((color, index) => 
+            color.color.toLowerCase() === normalizedHex.toLowerCase() && 
+            index !== editingIndex // Exclude the color being edited
+        );
+        
+        if (existingColorIndex !== -1 && !duplicateWarning) {
+            // Color already exists, show warning
+            setDuplicateWarning({ show: true, existingIndex: existingColorIndex });
+            return;
+        }
+
+        // Clear any duplicate warning
+        setDuplicateWarning(null);
+
+        let newColors: Color[];
+        if (editingIndex !== null) {
+            // Edit existing color
+            newColors = [...palette.colors];
+            newColors[editingIndex] = newColor;
+        } else {
+            // Add new color
+            newColors = [...palette.colors, newColor];
+        }
+
+        updatePalette(palette.id, { colors: newColors });
+        setPalette({ ...palette, colors: newColors });
+        
+        // Clear all validation errors and close modal
+        setHexError(null);
+        setColorNameError(null);
+        setShowColorModal(false);
+    };
+
+    const handleConfirmDuplicate = () => {
+        if (!palette) return;
+
+        // Normalize the hex color
+        const normalizedHex = normalizeHexColor(selectedColor);
+
+        const newColor: Color = {
+            color: normalizedHex,
+            name: colorName.trim() || null
+        };
+
+        let newColors: Color[];
+        if (editingIndex !== null) {
+            // Edit existing color (even if it creates a duplicate)
+            newColors = [...palette.colors];
+            newColors[editingIndex] = newColor;
+        } else {
+            // Add the duplicate color
+            newColors = [...palette.colors, newColor];
+        }
+
+        updatePalette(palette.id, { colors: newColors });
+        setPalette({ ...palette, colors: newColors });
+        
+        // Clear all validation errors and warnings
+        setDuplicateWarning(null);
+        setHexError(null);
+        setColorNameError(null);
+        setShowColorModal(false);
+    };
+
+    const handleCancelDuplicate = () => {
+        setDuplicateWarning(null);
+        // Keep the modal open so user can modify the color
+    };
+
+    const handleDeleteColor = () => {
+        if (!palette || editingIndex === null) return;
+
+        const newColors = palette.colors.filter((_, index) => index !== editingIndex);
+        updatePalette(palette.id, { colors: newColors });
+        setPalette({ ...palette, colors: newColors });
+        setShowColorModal(false);
     };
 
     return (
@@ -494,6 +837,359 @@ export default function PaletteEditorPage({ paletteId, onBack }: PaletteEditorPa
 
             {/* Footer */}
             <Footer />
+
+            {/* Color Modal */}
+            {showColorModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            {editingIndex !== null ? 'Edit Color' : 'Add Color'}
+                        </h3>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Color
+                                </label>
+                                <div className="flex gap-3 items-center">
+                                    <input
+                                        type="color"
+                                        value={isValidHexColor(selectedColor) ? selectedColor : '#000000'}
+                                        onChange={(e) => {
+                                            setSelectedColor(e.target.value);
+                                            setHexError(null);
+                                        }}
+                                        className="w-16 h-12 rounded border border-gray-300 dark:border-gray-600"
+                                    />
+                                    <div className="flex-1">
+                                        <input
+                                            type="text"
+                                            value={selectedColor}
+                                            onChange={(e) => {
+                                                setSelectedColor(e.target.value);
+                                                setHexError(null);
+                                            }}
+                                            className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                                                hexError 
+                                                    ? 'border-red-500 dark:border-red-400' 
+                                                    : 'border-gray-300 dark:border-gray-600'
+                                            }`}
+                                            placeholder="#000000"
+                                        />
+                                        {hexError && (
+                                            <p className="text-red-500 text-xs mt-1">{hexError}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    Name (optional, max 10 chars)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={colorName}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        if (value.length <= 10) {
+                                            setColorName(value);
+                                            setColorNameError(null);
+                                        }
+                                    }}
+                                    placeholder="e.g., Primary"
+                                    className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                                        colorNameError 
+                                            ? 'border-red-500 dark:border-red-400' 
+                                            : 'border-gray-300 dark:border-gray-600'
+                                    }`}
+                                />
+                                <div className="flex justify-between items-center mt-1">
+                                    {colorNameError && (
+                                        <p className="text-red-500 text-xs">{colorNameError}</p>
+                                    )}
+                                    <p className={colorName.length === 10 ? "text-red-500 text-xs ml-auto" : "text-gray-500 text-xs ml-auto"}>{colorName.length}/10</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Duplicate Warning */}
+                        {duplicateWarning?.show && palette && (
+                            <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                <div className="flex items-start gap-3">
+                                    <FontAwesomeIcon icon={faExclamationTriangle} className="text-yellow-600 dark:text-yellow-400 mt-1" />
+                                    <div className="flex-1">
+                                        <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                                            Color Already Exists
+                                        </h4>
+                                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-3">
+                                            The color <strong>{selectedColor.toUpperCase()}</strong> already exists in this palette
+                                            {palette.colors[duplicateWarning.existingIndex]?.name && 
+                                                ` as "${palette.colors[duplicateWarning.existingIndex].name}"`
+                                            }. 
+                                            {editingIndex !== null 
+                                                ? 'Do you want to change this color to match the existing one?' 
+                                                : 'Do you want to add it again?'
+                                            }
+                                        </p>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleConfirmDuplicate}
+                                                className="px-3 py-1 bg-yellow-600 text-white rounded text-sm hover:bg-yellow-700 transition-colors"
+                                            >
+                                                {editingIndex !== null ? 'Save Anyway' : 'Add Anyway'}
+                                            </button>
+                                            <button
+                                                onClick={handleCancelDuplicate}
+                                                className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={handleSaveColor}
+                                disabled={!!duplicateWarning?.show}
+                                className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                                    duplicateWarning?.show 
+                                        ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
+                                        : 'bg-primary-500 text-white hover:bg-primary-600'
+                                }`}
+                            >
+                                {editingIndex !== null ? 'Save Changes' : 'Add Color'}
+                            </button>
+                            {editingIndex !== null && (
+                                <button
+                                    onClick={handleDeleteColor}
+                                    className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                >
+                                    Delete
+                                </button>
+                            )}
+                            <button
+                                onClick={() => {
+                                    setShowColorModal(false);
+                                    setDuplicateWarning(null);
+                                    setHexError(null);
+                                    setColorNameError(null);
+                                }}
+                                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Contrast Checker Modal */}
+            {showContrastChecker && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-8">
+                            <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                                <FontAwesomeIcon icon={faSearch} className="mr-3" />
+                                Contrast Checker
+                            </h2>
+                            <button
+                                onClick={() => setShowContrastChecker(false)}
+                                className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                            >
+                                <FontAwesomeIcon icon={faTimes} className="text-xl" />
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Color Selection */}
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Foreground Color
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="color"
+                                            value={contrastForeground}
+                                            onChange={(e) => setContrastForeground(e.target.value)}
+                                            className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={contrastForeground}
+                                            onChange={(e) => setContrastForeground(e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+                                        />
+                                    </div>
+                                    {palette.colors.length > 0 && (
+                                        <div className="mt-2">
+                                            <p className="text-xs text-gray-500 mb-1">Quick select from palette:</p>
+                                            <div className="flex gap-1 flex-wrap">
+                                                {palette.colors.map((color, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setContrastForeground(color.color)}
+                                                        className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform"
+                                                        style={{ backgroundColor: color.color }}
+                                                        title={color.name || color.color}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <hr className="my-4 border-gray-300 dark:border-gray-600" />
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Background Color
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="color"
+                                            value={contrastBackground}
+                                            onChange={(e) => setContrastBackground(e.target.value)}
+                                            className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={contrastBackground}
+                                            onChange={(e) => setContrastBackground(e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+                                        />
+                                    </div>
+                                    {palette.colors.length > 0 && (
+                                        <div className="mt-2">
+                                            <p className="text-xs text-gray-500 mb-1">Quick select from palette:</p>
+                                            <div className="flex gap-1 flex-wrap">
+                                                {palette.colors.map((color, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setContrastBackground(color.color)}
+                                                        className="w-6 h-6 rounded border border-gray-300 dark:border-gray-600 hover:scale-110 transition-transform"
+                                                        style={{ backgroundColor: color.color }}
+                                                        title={color.name || color.color}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <hr className="my-4 border-gray-300 dark:border-gray-600" />
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Text Size
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setTextSize('normal')}
+                                            className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${textSize === 'normal'
+                                                ? 'bg-primary-500 text-white border-primary-500'
+                                                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                                }`}
+                                        >
+                                            Normal Text
+                                        </button>
+                                        <button
+                                            onClick={() => setTextSize('large')}
+                                            className={`flex-1 px-3 py-2 text-sm rounded-lg border transition-colors ${textSize === 'large'
+                                                ? 'bg-primary-500 text-white border-primary-500'
+                                                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                                }`}
+                                        >
+                                            Large Text
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        {textSize === 'normal' ? 'Normal text is below 18pt (~24px) regular weight OR below 14pt (~18.66px) if it\'s bold' :
+                                         'Large Text is at least 18pt (~24px) regular weight OR at least 14pt (~18.66px) bold'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Contrast Results */}
+                            <div className="space-y-4">
+                                {(() => {
+                                    const actualContrast = calculateContrastRatio(contrastForeground, contrastBackground);
+
+                                    return (
+                                        <>
+                                            <div className="text-center">
+                                                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                                    {actualContrast}:1
+                                                </div>
+                                                <div className="text-sm text-gray-500">Contrast Ratio</div>
+                                            </div>
+                                            <div className="font-semibold mb-2 text-gray-500 text-xs uppercase tracking-wider">
+                                                {textSize === 'normal' ? 'Normal Text Preview' : 'Large Text Preview'}
+                                            </div>
+                                            {/* Preview */}
+                                            <div
+                                                className="p-4 rounded-lg border border-gray-300 dark:border-gray-600"
+                                                style={{
+                                                    backgroundColor: contrastBackground,
+                                                    color: contrastForeground
+                                                }}
+                                            >
+                                                <div className="space-y-3">
+                                                    {textSize === 'normal' ? (
+                                                        <>
+                                                            <div className="text-base">Sample heading text</div>
+                                                            <div className="text-sm">Regular paragraph text for reading and general content</div>
+                                                            <div className="text-xs">Small text for captions and fine print</div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <div className="text-xl font-bold">Large heading text</div>
+                                                            <div className="text-lg">Large paragraph text for better readability</div>
+                                                            <div className="text-base font-semibold">Large bold text for emphasis</div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* WCAG Compliance */}
+                                            <div className="space-y-3">
+                                                <h3 className="font-semibold text-gray-900 dark:text-white">WCAG Compliance</h3>
+                                                <div className="space-y-2 text-sm">
+                                                    <div className={`flex items-center gap-2 ${actualContrast >= 4.5 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        <FontAwesomeIcon icon={actualContrast >= 4.5 ? faCheck : faXmark} />
+                                                        <span>AA Normal Text (4.5:1)</span>
+                                                    </div>
+                                                    <div className={`flex items-center gap-2 ${actualContrast >= 3 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        <FontAwesomeIcon icon={actualContrast >= 3 ? faCheck : faXmark} />
+                                                        <span>AA Large Text (3:1)</span>
+                                                    </div>
+                                                    <div className={`flex items-center gap-2 ${actualContrast >= 7 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        <FontAwesomeIcon icon={actualContrast >= 7 ? faCheck : faXmark} />
+                                                        <span>AAA Normal Text (7:1)</span>
+                                                    </div>
+                                                    <div className={`flex items-center gap-2 ${actualContrast >= 4.5 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        <FontAwesomeIcon icon={actualContrast >= 4.5 ? faCheck : faXmark} />
+                                                        <span>AAA Large Text (4.5:1)</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={() => setShowContrastChecker(false)}
+                                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Copy Notification Popup */}
             {copyNotification && (
