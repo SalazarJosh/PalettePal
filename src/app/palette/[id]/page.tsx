@@ -1,4 +1,4 @@
-import PaletteEditor from "@/components/PaletteEditor";
+import PaletteEditorPage from "@/pages/PaletteEditorPage";
 
 interface PageProps {
   params: Promise<{
@@ -17,5 +17,5 @@ export async function generateStaticParams() {
 
 export default async function PalettePage({ params }: PageProps) {
   const { id } = await params;
-  return <PaletteEditor paletteId={id} />;
+  return <PaletteEditorPage paletteId={id} />;
 }

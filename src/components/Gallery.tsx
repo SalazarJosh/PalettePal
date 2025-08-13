@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Palette } from '@/types';
-import PaletteEditor from './PaletteEditor';
+import PaletteEditorPage from '@/pages/PaletteEditorPage';
 import Footer from './Footer';
 import Logo from './Logo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -377,7 +377,7 @@ export default function Gallery() {
 
   // If editing a palette, show the palette editor
   if (editingPaletteId) {
-    return <PaletteEditor paletteId={editingPaletteId} onBack={handleBackToGallery} />;
+    return <PaletteEditorPage paletteId={editingPaletteId} onBack={handleBackToGallery} />;
   }
 
   if (!isLoaded) {
