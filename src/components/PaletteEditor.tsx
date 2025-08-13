@@ -419,7 +419,7 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
   };
 
   return (
-    <div className={`grid ${gridCols} gap-4 p-6`}>
+    <div className={`grid ${gridCols} gap-4 py-6`}>
       {colors.map((color, index) => {
         if (!showShadesTints) {
           // Normal single color display
