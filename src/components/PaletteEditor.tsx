@@ -6,7 +6,7 @@ import { Color, Palette } from '@/types';
 import Link from 'next/link';
 import Footer from './Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPalette, faClipboard, faCheck, faEdit, faPlus, faExclamationTriangle, faTimes, faSearch, faXmark, faCircle, faAdjust, faMagic } from '@fortawesome/free-solid-svg-icons';
+import { faPalette, faClipboard, faCheck, faEdit, faPlus, faExclamationTriangle, faTimes, faSearch, faXmark, faCircle, faAdjust, faMagic, faGripVertical } from '@fortawesome/free-solid-svg-icons';
 
 // Validation functions
 function isValidHexColor(hex: string): boolean {
@@ -357,12 +357,17 @@ interface ColorGridProps {
   gridSize: 'small' | 'medium' | 'large';
   onCopyNotification: (message: string) => void;
   showShadesTints: boolean;
+  onReorderColors: (fromIndex: number, toIndex: number) => void;
 }
 
-function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotification, showShadesTints }: ColorGridProps) {
+function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotification, showShadesTints, onReorderColors }: ColorGridProps) {
   const maxColors = gridSize === 'small' ? 12 : gridSize === 'medium' ? 24 : 48;
   const gridCols = gridSize === 'small' ? 'grid-cols-2' : gridSize === 'medium' ? 'grid-cols-3' : 'grid-cols-4';
   const isCompactView = gridSize === 'large';
+
+  // Drag and drop state
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -379,25 +384,82 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
     });
   };
 
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, toIndex: number) => {
+    e.preventDefault();
+    const fromIndex = draggedIndex;
+    
+    if (fromIndex !== null && fromIndex !== toIndex) {
+      onReorderColors(fromIndex, toIndex);
+    }
+    
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className={`grid ${gridCols} gap-4 p-6`}>
       {colors.map((color, index) => {
         if (!showShadesTints) {
           // Normal single color display
           const { textColor, contrastRatio } = getTextColorAndContrast(color.color);
+          const isDragged = draggedIndex === index;
+          const isDraggedOver = dragOverIndex === index;
+          
           return (
             <div
               key={index}
-              className="relative transition-transform group overflow-hidden"
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`relative transition-all duration-200 group overflow-hidden cursor-move ${
+                isDragged ? 'opacity-50 scale-95' : ''
+              } ${
+                isDraggedOver ? 'ring-2 ring-primary-500 ring-offset-2' : ''
+              }`}
               style={{
                 backgroundColor: color.color,
                 aspectRatio: '2/1',
                 minHeight: '80px'
               }}
             >
+              {/* Drag handle */}
+              <div 
+                className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black bg-opacity-20 hover:bg-opacity-40 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity z-20 cursor-move"
+                title="Drag to reorder"
+              >
+                <FontAwesomeIcon icon={faGripVertical} />
+              </div>
               {/* Main display area - clickable for copying */}
               <button
-                onClick={() => copyToClipboard(color.color)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(color.color);
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
                 className={isCompactView ? "swatch-button absolute inset-0 w-full h-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity" : "absolute inset-0 w-full h-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity"}
                 style={{ color: textColor }}
                 title={`Click to copy ${color.color}`}
@@ -437,7 +499,8 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
                   e.stopPropagation();
                   onColorClick(index);
                 }}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-sm hover:shadow-md z-10"
+                onMouseDown={(e) => e.stopPropagation()}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-sm hover:shadow-md z-30"
                 style={{
                   backgroundColor: textColor === '#ffffff' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
                   color: textColor === '#ffffff' ? '#000000' : '#ffffff',
@@ -458,6 +521,8 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
           // Shades and tints display as horizontal bands
           const { shades, tints } = generateShadesTints(color.color);
           const { textColor: originalTextColor, contrastRatio } = getTextColorAndContrast(color.color);
+          const isDragged = draggedIndex === index;
+          const isDraggedOver = dragOverIndex === index;
 
           // Calculate band heights as percentages
           const totalBands = tints.length + 1 + shades.length; // tints + original + shades
@@ -467,19 +532,40 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
           return (
             <div
               key={index}
-              className="relative transition-transform group overflow-hidden"
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`relative transition-all duration-200 group overflow-hidden cursor-move ${
+                isDragged ? 'opacity-50 scale-95' : ''
+              } ${
+                isDraggedOver ? 'ring-2 ring-primary-500 ring-offset-2' : ''
+              }`}
               style={{
                 aspectRatio: '2/1',
                 minHeight: '80px'
               }}
             >
+              {/* Drag handle */}
+              <div 
+                className="absolute top-2 left-2 w-6 h-6 rounded-full bg-black bg-opacity-20 hover:bg-opacity-40 flex items-center justify-center text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity z-20 cursor-move"
+                title="Drag to reorder"
+              >
+                <FontAwesomeIcon icon={faGripVertical} />
+              </div>
               {/* Tints (lighter bands at top) */}
               {tints.map((tint, tintIndex) => {
                 const { textColor } = getTextColorAndContrast(tint);
                 return (
                   <button
                     key={`tint-${tintIndex}`}
-                    onClick={() => copyToClipboard(tint)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(tint);
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
                     className="swatch-button absolute w-full transition-opacity flex items-center justify-center text-xs font-mono group"
                     style={{
                       backgroundColor: tint,
@@ -498,7 +584,11 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
 
               {/* Original color band (larger, in middle) */}
               <button
-                onClick={() => copyToClipboard(color.color)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  copyToClipboard(color.color);
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
                 className={isCompactView ? "swatch-button absolute w-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity" : "absolute w-full flex justify-between items-center p-3 text-center cursor-pointer transition-opacity"}
                 style={{
                   backgroundColor: color.color,
@@ -546,7 +636,11 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
                 return (
                   <button
                     key={`shade-${shadeIndex}`}
-                    onClick={() => copyToClipboard(shade)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyToClipboard(shade);
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
                     className="swatch-button absolute w-full transition-opacity flex items-center justify-center text-xs font-mono group"
                     style={{
                       backgroundColor: shade,
@@ -569,7 +663,8 @@ function ColorGrid({ colors, onColorClick, onAddColor, gridSize, onCopyNotificat
                   e.stopPropagation();
                   onColorClick(index);
                 }}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full transition-all flex items-center justify-center shadow-sm hover:shadow-md z-10"
+                onMouseDown={(e) => e.stopPropagation()}
+                className="absolute top-2 right-2 w-7 h-7 rounded-full transition-all flex items-center justify-center shadow-sm hover:shadow-md z-30"
                 style={{
                   backgroundColor: originalTextColor === '#ffffff' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
                   color: originalTextColor === '#ffffff' ? '#000000' : '#ffffff',
@@ -886,6 +981,23 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
     setTimeout(() => setCopyNotification(null), 3000);
   };
 
+  const handleReorderColors = (fromIndex: number, toIndex: number) => {
+    if (!palette) return;
+    
+    const newColors = [...palette.colors];
+    const [movedColor] = newColors.splice(fromIndex, 1);
+    newColors.splice(toIndex, 0, movedColor);
+    
+    const updatedPalette = { ...palette, colors: newColors };
+    updatePalette(palette.id, { colors: newColors });
+    setPalette(updatedPalette);
+    
+    // Show notification
+    setCopyNotification(`Moved ${movedColor.name ? movedColor.name : movedColor.color} to position ${toIndex + 1}`);
+    console.log(movedColor);
+    setTimeout(() => setCopyNotification(null), 2000);
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
       setCopyNotification(`Copied ${text}`);
@@ -1065,6 +1177,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
             gridSize={palette.gridSize}
             onCopyNotification={handleCopyNotification}
             showShadesTints={showShadesTints}
+            onReorderColors={handleReorderColors}
           />
         ) : (
           <div className="text-center py-16">
