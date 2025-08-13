@@ -3,23 +3,25 @@
 import Link from 'next/link';
 
 interface LogoProps {
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'extraLarge';
   showText?: boolean;
   linkToHome?: boolean;
+  isAnimated?: boolean;
+  isCentered?: boolean;
 }
 
-export default function Logo({ size = 'medium', showText = true, linkToHome = true }: LogoProps) {
+export default function Logo({ isCentered = false, size = 'medium', showText = true, linkToHome = false, isAnimated = false }: LogoProps) {
   const sizeMap = {
     small: 24,
     medium: 32,
-    large: 40
+    large: 40,
+    extraLarge: 100
   };
 
   const logoSize = sizeMap[size];
 
   const LogoContent = () => (
     <div className="flex items-center gap-3">
-      {/* PalettePal SVG Logo */}
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
         id="Layer_2" 
@@ -28,6 +30,7 @@ export default function Logo({ size = 'medium', showText = true, linkToHome = tr
         width={logoSize}
         height={logoSize}
         className="rounded-lg"
+        style={isCentered ? { margin: '0 auto' } : {}}
       >
         <defs>
           <style>
@@ -40,6 +43,36 @@ export default function Logo({ size = 'medium', showText = true, linkToHome = tr
               .cls-6 { fill: #328be5; }
               .cls-7 { fill: #80d8d4; }
               .cls-8 { fill: #acacea; }
+              
+              ${isAnimated ? `
+                @keyframes rotateInnerSegment {
+                  0% { transform: rotate(0deg); }
+                  25% { transform: rotate(540deg); }
+                  50% { transform: rotate(90deg); }
+                  75% { transform: rotate(630deg); }
+                  100% { transform: rotate(0deg); }
+                }
+                
+                .cls-7 {
+                  animation: rotateInnerSegment 7s ease-in-out infinite;
+                  transform-origin: center;
+                }
+                
+                .cls-2 {
+                  animation: rotateInnerSegment 7s ease-in-out infinite;
+                  transform-origin: center;
+                }
+                
+                .cls-1 {
+                  animation: rotateInnerSegment 7s ease-in-out infinite;
+                  transform-origin: center;
+                }
+                
+                .cls-8 {
+                  animation: rotateInnerSegment 7s ease-in-out infinite;
+                  transform-origin: center;
+                }
+              ` : ''}
             `}
           </style>
         </defs>
@@ -74,13 +107,14 @@ export default function Logo({ size = 'medium', showText = true, linkToHome = tr
     </div>
   );
 
-  if (linkToHome) {
-    return (
-      <Link href="/" className="hover:opacity-80 transition-opacity">
-        <LogoContent />
-      </Link>
-    );
-  }
+  //not really needed since there's already a "gallery" button to go home
+//   if (linkToHome) {
+//     return (
+//       <Link href="/" className="hover:opacity-80 transition-opacity">
+//         <LogoContent />
+//       </Link>
+//     );
+//   }
 
   return <LogoContent />;
 }

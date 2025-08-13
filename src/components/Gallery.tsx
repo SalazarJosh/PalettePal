@@ -385,7 +385,7 @@ export default function Gallery() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">
-            <FontAwesomeIcon icon={faPalette} className="text-primary-500" />
+              <Logo isCentered={true} isAnimated={true} size="extraLarge" showText={false} linkToHome={false} />
           </div>
           <div className="text-lg text-gray-600">Loading PalettePal...</div>
         </div>
@@ -403,38 +403,23 @@ export default function Gallery() {
               <Logo size="medium" showText={true} linkToHome={false} />
               <div className="flex gap-3">
                 <button
-                  onClick={() => setShowNewPalette(true)}
-                  className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                  onClick={handleBackupData}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                  + New Palette
+                  Backup
                 </button>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={handleImportPalette}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    Import
-                  </button>
-                  <button
-                    onClick={handleBackupData}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    Backup
-                  </button>
-                  <button
-                    onClick={() => setShowSettings(true)}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    Settings
-                  </button>
-                  <button
-                    onClick={() => setShowWelcomeModal(true)}
-                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                  >
-                    About
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  Settings
+                </button>
+                <button
+                  onClick={() => setShowWelcomeModal(true)}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                >
+                  About
+                </button>
               </div>
             </div>
           </div>
@@ -442,6 +427,25 @@ export default function Gallery() {
 
         {/* Controls */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <button
+              onClick={() => setShowNewPalette(true)}
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors flex items-center gap-2 font-medium"
+            >
+              <FontAwesomeIcon icon={faPalette} />
+              New Palette
+            </button>
+            <button
+              onClick={handleImportPalette}
+              className="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
+            >
+              <FontAwesomeIcon icon={faFolder} />
+              Import Palette
+            </button>
+          </div>
+
+          {/* Search and Filter Controls */}
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mb-6">
             <div className="flex gap-4 items-center flex-1">
               <input
