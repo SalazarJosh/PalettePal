@@ -988,7 +988,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
               <button
                 onClick={handleClearPalette}
                 disabled={palette.colors.length === 0}
-                className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 bg-red-50 dark:bg-red-700 text-red-600 dark:text-red-50 rounded-lg hover:bg-red-100 dark:hover:bg-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Clear
               </button>
@@ -1020,7 +1020,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
               )}
               <button
                 onClick={() => setShowContrastChecker(true)}
-                className="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center gap-2"
               >
                 <FontAwesomeIcon icon={faSearch} />
                 Contrast Checker
@@ -1028,8 +1028,8 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
               <button
                 onClick={() => setShowShadesTints(!showShadesTints)}
                 className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${showShadesTints
-                    ? 'bg-purple-500 text-white hover:bg-purple-600'
-                    : 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30'
+                    ? 'bg-gray-100 dark:bg-gray-300 text-gray-700 dark:text-gray-900 hover:bg-gray-200 dark:hover:bg-gray-400'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
               >
                 <FontAwesomeIcon icon={faAdjust} />
