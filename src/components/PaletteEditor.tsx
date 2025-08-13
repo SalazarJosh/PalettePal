@@ -836,7 +836,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
   const handleClearPalette = () => {
     if (!palette || palette.colors.length === 0) return;
 
-    if (confirm('Clear all colors from the palette?')) {
+    if (confirm('Clear all colors from the palette? This action cannot be undone.')) {
       updatePalette(palette.id, { colors: [] });
       setPalette({ ...palette, colors: [] });
     }
@@ -954,7 +954,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                       {paletteNameError && (
                         <p className="text-red-500 text-xs mt-1">{paletteNameError}</p>
                       )}
-                      <p className="text-gray-500 text-xs mt-1">{tempPaletteName.length}/20</p>
+                      <p className={tempPaletteName.length === 20 ? "text-red-500 text-xs mt-1" : "text-gray-500 text-xs mt-1"}>{tempPaletteName.length}/20</p>
                     </div>
                     <button
                       onClick={handleSavePaletteName}
@@ -990,7 +990,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                 disabled={palette.colors.length === 0}
                 className="px-4 py-2 bg-red-50 dark:bg-red-700 text-red-600 dark:text-red-50 rounded-lg hover:bg-red-100 dark:hover:bg-red-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Clear
+                Clear All
               </button>
               <button
                 onClick={handleExportPalette}
@@ -1167,7 +1167,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                   {colorNameError && (
                     <p className="text-red-500 text-xs">{colorNameError}</p>
                   )}
-                  <p className="text-gray-500 text-xs ml-auto">{colorName.length}/10</p>
+                  <p className={colorName.length === 10 ? "text-red-500 text-xs ml-auto" : "text-gray-500 text-xs ml-auto"}>{colorName.length}/10</p>
                 </div>
               </div>
             </div>
@@ -1383,7 +1383,9 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                         </div>
                         <div className="text-sm text-gray-500">Contrast Ratio</div>
                       </div>
-
+                      <div className="font-semibold mb-2 text-gray-500 text-xs uppercase tracking-wider">
+                        {textSize === 'normal' ? 'Normal Text Preview' : 'Large Text Preview'}
+                      </div>
                       {/* Preview */}
                       <div
                         className="p-4 rounded-lg border border-gray-300 dark:border-gray-600"
@@ -1393,9 +1395,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                         }}
                       >
                         <div className="space-y-3">
-                          <div className="font-semibold mb-2 text-gray-500 text-xs uppercase tracking-wider">
-                            {textSize === 'normal' ? 'Normal Text Preview' : 'Large Text Preview'}
-                          </div>
+                          
                           {textSize === 'normal' ? (
                             <>
                               <div className="text-base">Sample heading text</div>
