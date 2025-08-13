@@ -16,7 +16,7 @@ export default function Footer({ statsText }: FooterProps) {
           <div className='flex items-center gap-4'>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <FontAwesomeIcon icon={faCode} className="text-blue-500 w-4 h-4" />
-              <span>Developed by <a href="https://github.com/SalazarJosh" className='text-gray-300 hover:text-gray-100'>Josh</a> using NextJS</span>
+              <span>Developed by <a href="https://github.com/SalazarJosh" className='text-blue-500 hover:text-blue-700 dark:text-gray-300 hover:text-gray-100'>Josh</a> using NextJS</span>
               <FontAwesomeIcon icon={faReact} className="text-blue-500 w-4 h-4" />
             </div>
           </div>

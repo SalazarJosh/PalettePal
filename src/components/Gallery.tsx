@@ -5,6 +5,7 @@ import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Palette } from '@/types';
 import PaletteEditor from './PaletteEditor';
 import Footer from './Footer';
+import Logo from './Logo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckSquare, faPause, faPalette, faThLarge, faBars, faSave, faFolder, faTrash, faChartBar, faDatabase, faStar, faEye, faGear, faMagic } from '@fortawesome/free-solid-svg-icons';
 
@@ -399,10 +400,7 @@ export default function Gallery() {
         <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">PalettePal</h1>
-                <p className="text-sm text-gray-500">Your Color Palette Tool</p>
-              </div>
+              <Logo size="medium" showText={true} linkToHome={false} />
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowNewPalette(true)}
@@ -585,7 +583,7 @@ export default function Gallery() {
                       {autoSaveEnabled ? 'Auto-save enabled' : 'Auto-save disabled'}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {autoSaveEnabled ? 'Changes are saved automatically' : 'Save manually to preserve changes'}
+                      {autoSaveEnabled ? 'Changes are saved automatically to your computer\'s storage' : 'Save manually to preserve changes'}
                     </p>
                   </div>
                   <button
@@ -694,7 +692,7 @@ export default function Gallery() {
                 </div>
                 <div className="flex items-center gap-2">
                   <FontAwesomeIcon icon={faStar} className="w-4 h-4 text-primary-500" />
-                  <span><strong>Quick Start:</strong> Click &quot;New Palette&quot; to create your first collection</span>
+                  <span><strong>Quick Start:</strong> I created your first empty palette for you</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <FontAwesomeIcon icon={faGear} className="w-4 h-4 text-primary-500" />

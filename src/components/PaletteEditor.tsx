@@ -5,6 +5,7 @@ import { usePaletteStorage } from '@/hooks/usePaletteStorage';
 import { Color, Palette } from '@/types';
 import Link from 'next/link';
 import Footer from './Footer';
+import Logo from './Logo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPalette, faClipboard, faCheck, faEdit, faPlus, faExclamationTriangle, faTimes, faSearch, faXmark, faCircle, faAdjust, faMagic, faGripVertical } from '@fortawesome/free-solid-svg-icons';
 
@@ -1022,7 +1023,9 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
+              <Logo size="medium" showText={true} linkToHome={true} />
+              <div className="flex items-center gap-4">
               {onBack ? (
                 <button
                   onClick={onBack}
@@ -1094,6 +1097,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                   </div>
                 )}
                 {!isEditingName ? <p className="text-sm text-gray-500" id="colorCount">{palette.colors.length} colors</p> : null}
+              </div>
               </div>
             </div>
             <div className="flex gap-3">
@@ -1475,7 +1479,7 @@ export default function PaletteEditor({ paletteId, onBack }: PaletteEditorProps)
                       Large Text
                     </button>
                   </div>
-                  <p className="text-xs text-gray-300 mt-2">
+                  <p className="text-xs text-gray-500 mt-2">
                     {textSize === 'normal' ? 'Normal text is below 18pt (~24px) regular weight OR below 14pt (~18.66px) if it’s bold' :
                      'Large Text is at least 18pt (~24px) regular weight OR at least 14pt (~18.66px) bold'}
                   </p>
